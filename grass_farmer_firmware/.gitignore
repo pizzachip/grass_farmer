@@ -15,7 +15,3 @@
 
 # If the VM crashes, it generates a dump, let's ignore it too.
 erl_crash.dump
-
-# Place to store creds to local wifi
-/config/wifi_creds.exs
-
