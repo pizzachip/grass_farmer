@@ -9,9 +9,11 @@ defmodule GrassFarmer.MixProject do
     [
       app: @app,
       version: @version,
-      elixir: "~> 1.11",
+      elixir: "~> 1.14",
       archives: [nerves_bootstrap: "~> 1.11"],
+      elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
+      aliases: aliases(),
       deps: deps(),
       releases: [{@app, release()}],
       preferred_cli_target: [run: :host, test: :host]
@@ -26,9 +28,33 @@ defmodule GrassFarmer.MixProject do
     ]
   end
 
+  # Specifies which paths to compile per environment.
+    defp elixirc_paths(:test), do: ["lib", "test/support"]
+    defp elixirc_paths(_), do: ["lib"]
+
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
+      # Phoenix and LiveView
+      {:phoenix, "~> 1.7.6"},
+      {:phoenix_ecto, "~> 4.4"},
+      {:ecto_sqlite3, "~> 0.10"},
+      {:postgrex, ">= 0.0.0"},
+      {:phoenix_html, "~> 3.3"},
+      {:phoenix_live_reload, "~> 1.2", only: :dev},
+      {:phoenix_live_view, "~> 0.19.0"},
+      {:floki, ">= 0.30.0", only: :test},
+      {:phoenix_live_dashboard, "~> 0.8.0"},
+      {:esbuild, "~> 0.7", runtime: Mix.env() == :dev},
+      {:tailwind, "~> 0.2.0", runtime: Mix.env() == :dev},
+      {:swoosh, "~> 1.3"},
+      {:finch, "~> 0.13"},
+      {:telemetry_metrics, "~> 0.6"},
+      {:telemetry_poller, "~> 1.0"},
+      {:gettext, "~> 0.20"},
+      {:jason, "~> 1.2"},
+      {:plug_cowboy, "~> 2.5"},
+
       # Dependencies for all targets
       {:nerves, "~> 1.10", runtime: false},
       {:shoehorn, "~> 0.9.1"},
@@ -36,7 +62,7 @@ defmodule GrassFarmer.MixProject do
       {:toolshed, "~> 0.3.0"},
       {:circuits_gpio, "~> 1.1"},
       {:pinout, "~> 0.1.3"},
-      # {:vintage_net_wifi, "~> 0.9.0", targets: @all_targets},
+      {:nerves_time_zones, "~> 0.3.2"},
 
       # Dependencies for all targets except :host
       {:nerves_runtime, "~> 0.13.0", targets: @all_targets},
@@ -58,6 +84,24 @@ defmodule GrassFarmer.MixProject do
       {:nerves_system_x86_64, "~> 1.19", runtime: false, targets: :x86_64},
       {:nerves_system_grisp2, "~> 0.3", runtime: false, targets: :grisp2},
       {:nerves_system_mangopi_mq_pro, "~> 0.4.3", runtime: false, targets: :mangopi_mq_pro}
+    ]
+  end
+
+  # Aliases are shortcuts or tasks specific to the current project.
+  # For example, to install project dependencies and perform other setup tasks, run:
+  #
+  #     $ mix setup
+  #
+  # See the documentation for `Mix` for more info on aliases.
+  defp aliases do
+    [
+      setup: ["deps.get", "ecto.setup", "assets.setup", "assets.build"],
+      "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
+      "ecto.reset": ["ecto.drop", "ecto.setup"],
+      test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
+      "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
+      "assets.build": ["tailwind default", "esbuild default"],
+      "assets.deploy": ["tailwind default --minify", "esbuild default --minify", "phx.digest"]
     ]
   end
 

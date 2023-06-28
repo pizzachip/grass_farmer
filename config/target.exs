@@ -1,5 +1,15 @@
 import Config
 
+# Configs from Phoenix Liveview
+config :grass_farmer, GrassFarmerWeb.Endpoint, cache_static_manifest: "priv/static/cache_manifest.json"
+
+# Configures Swoosh API Client
+config :swoosh, api_client: Swoosh.ApiClient.Finch, finch_name: GrassFarmer.Finch
+
+# Do not print debug messages in production
+config :logger, level: :info
+
+
 # Use Ringlogger as the logger backend and remove :console.
 # See https://hexdocs.pm/ring_logger/readme.html for more information on
 # configuring ring_logger.
@@ -54,7 +64,7 @@ config :vintage_net,
        type: VintageNetEthernet,
        ipv4: %{method: :dhcp}
      }},
-    {"wlan0", 
+    {"wlan0",
       %{
         type: VintageNetWiFi,
         vintage_net_wifi: %{

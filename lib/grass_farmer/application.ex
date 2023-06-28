@@ -13,12 +13,28 @@ defmodule GrassFarmer.Application do
 
     children =
       [
-        # Children for all targets
-        # Starts a worker by calling: GrassFarmer.Worker.start_link(arg)
-        # {GrassFarmer.Worker, arg},
+        # Start the Telemetry supervisor
+        GrassFarmerWeb.Telemetry,
+        # Start the Ecto repository
+        GrassFarmer.Repo,
+        # Start the PubSub system
+        {Phoenix.PubSub, name: GrassFarmer.PubSub},
+        # Start Finch
+        {Finch, name: GrassFarmer.Finch},
+        # Start the Endpoint (http/https)
+        GrassFarmerWeb.Endpoint
+        # Start a worker by calling: GrassFarmer.Worker.start_link(arg)
+        # {GrassFarmer.Worker, arg}
       ] ++ children(target())
 
+    opts = [strategy: :one_for_one, name: GrassFarmer.Supervisor]
     Supervisor.start_link(children, opts)
+  end
+
+  @impl true
+  def config_change(changed, _new, removed) do
+    GrassFarmerWeb.Endpoint.config_change(changed, removed)
+    :ok
   end
 
   # List all child processes to be supervised
