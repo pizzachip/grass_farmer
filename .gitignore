@@ -17,5 +17,5 @@
 erl_crash.dump
 
 # Place to store creds to local wifi
-/config/wifi_creds.exs
+/grass_farmer_firmware/config/wifi_creds.exs
 

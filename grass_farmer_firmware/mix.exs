@@ -30,7 +30,7 @@ defmodule GrassFarmerFirmware.MixProject do
   defp deps do
     [
       # Dependencies for all targets
-      {:nerves, "~> 1.10", runtime: false},
+      {:nerves, "~> 1.7.0", runtime: false},
       {:shoehorn, "~> 0.9.1"},
       {:ring_logger, "~> 0.9.0"},
       {:toolshed, "~> 0.3.0"},
@@ -39,7 +39,7 @@ defmodule GrassFarmerFirmware.MixProject do
       {:nerves_time_zones, "~> 0.3.2"},
 
       # Dependencies for all targets except :host
-      {:my_app_ui, path: "../my_app_ui", targets: @all_targets, env: Mix.env()},
+      {:grass_farmer_ui, path: "../grass_farmer_ui", targets: @all_targets, env: Mix.env()},
       {:nerves_runtime, "~> 0.13.0", targets: @all_targets},
       {:nerves_pack, "~> 0.7.0", targets: @all_targets},
 
