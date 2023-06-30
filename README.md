@@ -61,10 +61,11 @@ Flashing to a Device
 You can burn the first image with the following commands:
 
 ```bash
+# NOTE - I've changed the default target on the Nerves examples hello live view to the mango pi.
 # If you want to enable wifi:
 # export NERVES_SSID="NetworkName" && export NERVES_PSK="password"
 MIX_ENV=prod MIX_TARGET=host mix do deps.get, assets.deploy
-MIX_ENV=prod MIX_TARGET=rpi3 mix do deps.get, firmware, burn
+MIX_ENV=prod MIX_TARGET=mangopi_mq_pro mix do deps.get, firmware, burn
 ```
 
 Once the image is running on the device, the following will build and update the firmware
@@ -74,7 +75,7 @@ over ssh.
 # If you want to enable wifi:
 # export NERVES_SSID="NetworkName" && export NERVES_PSK="password"
 MIX_ENV=prod MIX_TARGET=host mix do deps.get, assets.deploy
-MIX_ENV=prod MIX_TARGET=rpi3 mix do deps.get, firmware, upload grass_farmer.local
+MIX_ENV=prod MIX_TARGET=mangopi_mq_pro mix do deps.get, firmware, upload grass_farmer.local
 ```
 
 
