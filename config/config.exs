@@ -79,6 +79,10 @@ config :logger, :console,
   format: "$time $metadata[$level] $message\n",
   metadata: [:request_id]
 
+# For local time on the device
+config :nerves_time_zones, data_dir: "./tmp/nerves_time_zones"
+config :nerves_time_zones, default_time_zone: "America/Chicago"
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"

@@ -60,6 +60,9 @@ defmodule GrassFarmer.MixProject do
       {:shoehorn, "~> 0.9.1"},
       {:ring_logger, "~> 0.8.5"},
       {:toolshed, "~> 0.2.26"},
+      {:nerves_time_zones, "~> 0.3.2"},
+      {:tesla, "~> 1.4"},
+      {:hackney, "~> 1.17"},
 
       # Dependencies for all targets except :host
       {:nerves_runtime, "~> 0.13.0", targets: @all_targets},

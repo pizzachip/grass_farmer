@@ -21,6 +21,13 @@ Urban Grass Farmer is a hobby application sprinkler control system written in El
 *  VintageNet - so that you can connect to your wifi and internet connection for configuring on a browser and getting weather updates
 *  TBD - provides permance of configurations, schedules, and state in case of power outage (either db or just write to file - haven't decided, yet)
 
+## UI / vision
+I started this project because the only nerves-based sprinkler controller I could find was pretty old and the interface and general concept didn't match what I was looking for. I'm currently using Open Sprinkler (python-based) but the interface is pretty clunky. It seemed like this was low-hanging fruit.
+
+You can find the vision/design and my messy notes on this [Figma page](https://www.figma.com/file/BRZ4jzr4uUPRPr4XlogAJQ/Grass-Farm?type=design&node-id=0%3A1&mode=design&t=sFJBgkOhKvA8rDyo-1).
+
+## Contributions
+If you are a fellow nerves enthusiast and would like to contribute to this project, please do. I'm not super-experience in managing open repositories like this but I'm sure you can clone and submit a pull request. If you need help, just message me and I'll try to figure it out.
 
 ## Hardware
 I'm developing this on a Mango Pi MQ Pro but you should be able to deploy to any nerves target if you keep an eye on your configs. Raspberry Pi and Mango Pi have different pinouts, but that shouldn't be a problem.
