@@ -1,4 +1,5 @@
 defmodule GrassFarmerWeb.Home do
+  alias GrassFarmerWeb.Components.Schedule
   use GrassFarmerWeb, :live_view
 
   @impl true
@@ -9,10 +10,10 @@ defmodule GrassFarmerWeb.Home do
   @impl true
   def render(assigns) do
     ~H"""
-    <.page_title title="Suburban Grass Farmer" />
-    <.body>
-      Watering Schedule 
-    </.body>
+      <.page_title title="Suburban Grass Farmer" />
+      <.body>
+        <Schedule.quickview />
+      </.body>
     """
   end
 end
