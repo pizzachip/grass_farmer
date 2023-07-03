@@ -1,4 +1,4 @@
-defmodule GrassFarmerWeb.Components.Schedule do
+defmodule GrassFarmerWeb.Components.Weather do
   use Phoenix.Component
 
   import GrassFarmerWeb.Components.StyleBlocks
@@ -7,15 +7,13 @@ defmodule GrassFarmerWeb.Components.Schedule do
     ~H"""
     <.tile_row_wrapper>
       <.info_tile>
-        <.last_icon />
-        <.tile_text copy={%{title: "Last", text: "Thu 24 Jul 202X" }}/>
+        <.weather_icon />
+        <.tile_text copy={%{title: "Currently", text: "Sunny" }}/>
       </.info_tile>
       <.info_tile>
-        <.next_icon />
-        <.tile_text copy={%{title: "Next", text: "Sat 26 Jul 202X" }}/>
+        <.tile_text copy={%{title: "Next Rain", text: "1 Aug" }}/>
       </.info_tile>
     </.tile_row_wrapper>
     """
   end
-
 end

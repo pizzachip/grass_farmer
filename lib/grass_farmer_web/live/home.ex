@@ -1,6 +1,8 @@
 defmodule GrassFarmerWeb.Home do
-  alias GrassFarmerWeb.Components.Schedule
   use GrassFarmerWeb, :live_view
+  alias GrassFarmerWeb.Components.{Schedule, Weather}
+  alias Phoenix.PubSub
+
 
   @impl true
   def mount(_params, _session, socket) do
@@ -13,6 +15,7 @@ defmodule GrassFarmerWeb.Home do
       <.page_title title="Suburban Grass Farmer" />
       <.body>
         <Schedule.quickview />
+        <Weather.quickview />
       </.body>
     """
   end
