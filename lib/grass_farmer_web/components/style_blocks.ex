@@ -4,7 +4,7 @@ defmodule GrassFarmerWeb.Components.StyleBlocks do
   slot :inner_block, required: true
   def tile_row_wrapper(assigns) do
     ~H"""
-    <div class="flex items-start min-h-screen bg-gray-200 text-gray-800">
+    <div class="flex items-start bg-gray-200 text-gray-800">
       <div class="p-2 w-full">
         <div class="grid grid-cols-2 gap-2">
           <%= render_slot(@inner_block) %>
