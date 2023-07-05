@@ -5,15 +5,17 @@ defmodule GrassFarmerWeb.Components.Weather do
 
   def quickview(assigns) do
     ~H"""
-    <.tile_row_wrapper>
-      <.info_tile>
-        <.weather_icon />
-        <.tile_text copy={%{title: "Currently", text: "Sunny" }}/>
-      </.info_tile>
-      <.info_tile>
-        <.tile_text copy={%{title: "Next Rain", text: "1 Aug" }}/>
-      </.info_tile>
-    </.tile_row_wrapper>
+    <div class="my-2 mx-1">
+      <.tile_row_wrapper>
+        <.info_tile>
+          <.weather_icon />
+          <.tile_text copy={%{title: "Currently", text: "Sunny" }}/>
+        </.info_tile>
+        <.info_tile>
+          <.tile_text copy={%{title: "Next Rain", text: "1 Aug" }}/>
+        </.info_tile>
+      </.tile_row_wrapper>
+    </div>
     """
   end
 end

@@ -37,4 +37,7 @@ hello_live_view-*.tar
 npm-debug.log
 /assets/node_modules/
 
+# You can store local environment variables here if you want
+.env
+
 .DS_Store
