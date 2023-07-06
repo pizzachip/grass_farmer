@@ -1,21 +1,33 @@
 defmodule GrassFarmerWeb.Components.Zones do
-  use Phoenix.Component
+  use Phoenix.LiveComponent
+
+  alias GrassFarmer.Zone
 
   import GrassFarmerWeb.Components.StyleBlocks
 
-  def list(assigns) do
+  @impl true
+  def render(assigns) do
   ~H"""
-  <style>
-      body {background:white !important;}
-  </style>
-  <div class="main flex flex-col m-4">
-    <div class="header">
-      <div class="text-xl font-bold text-gray-600 mb-2">Watering Zones</div>
+  <div class="main flex flex-col h-full m-3">
+    <div>
+      <div class="header">
+        <div class="text-xl font-bold text-gray-600 mb-2">Watering Zones</div>
+      </div>
+      <%= for zone <- @zones do %>
+        <.zone_card zone={zone} />
+      <% end %>
     </div>
-    <.zone_card zone={%{name: "Front Yard", number: 1, status: "on"}} />
-    <.zone_card zone={%{name: "Front Yard", number: 2, status: "off"}} />
+    <div class="flex justify-end">
+      <button class="rounded-full text-2xl font-bold bg-green-200 px-3 py-1" phx-click="add_zone">+</button>
+    </div>
   </div>
   """
+  end
+
+  @impl true
+  def handle_event("add_zone", _params, socket) do
+    zone_max_id = socket.assigns.zones |> Enum.reduce(0, fn zone, acc -> max(zone.id, acc) end)
+    {:noreply, assign(socket, %{zones: [%Zone{id: zone_max_id + 1} | socket.assigns.zones]})}
   end
 
   attr :zone, :map, required: true
@@ -25,7 +37,7 @@ defmodule GrassFarmerWeb.Components.Zones do
         <div class="left">
           <div >
             <span class="header text-blue-600 font-semibold text-lb"><%= @zone.name %></span>
-            <span class="text-gray-600 font-semibold text-sm"><%= @zone.number %></span>
+            <span class="text-gray-600 font-semibold text-sm"><%= @zone.id %></span>
           </div>
         </div>
         <div class="right m-auto mr-0">

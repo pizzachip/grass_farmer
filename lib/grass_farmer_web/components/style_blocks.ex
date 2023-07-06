@@ -90,4 +90,35 @@ defmodule GrassFarmerWeb.Components.StyleBlocks do
       _    -> "bg-yellow-500"
     end
   end
+
+  @spec time_format(NaiveDateTime, atom()) :: String.t
+  def time_format(date, format) do
+    month = date.month |> month_string
+    time = date |> NaiveDateTime.to_time |> Time.to_string |> String.slice(0..4)
+    year = date.year |> to_string
+    day = date.day |> to_string
+    case format do
+      :just_date -> "#{month} #{day}"
+      :just_time -> "#{time}"
+      :full      -> "#{month} #{day}, #{year} #{time}"
+    end
+  end
+
+  @spec month_string(integer()) :: String.t
+  def month_string(month) do
+    case month do
+      1  -> "Jan"
+      2  -> "Feb"
+      3  -> "Mar"
+      4  -> "Apr"
+      5  -> "May"
+      6  -> "Jun"
+      7  -> "Jul"
+      8  -> "Aug"
+      9  -> "Sep"
+      10 -> "Oct"
+      11 -> "Nov"
+      12 -> "Dec"
+    end
+  end
 end

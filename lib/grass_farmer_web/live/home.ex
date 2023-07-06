@@ -1,6 +1,7 @@
 defmodule GrassFarmerWeb.Home do
   use GrassFarmerWeb, :live_view
-  alias GrassFarmerWeb.Components.{Schedule, Weather, Zones, Footer}
+  alias GrassFarmerWeb.Components.{Schedule, Weather, Zones, Footer, StyleBlocks}
+  alias GrassFarmer.Zone
   alias Phoenix.PubSub
 
   @impl true
@@ -8,9 +9,11 @@ defmodule GrassFarmerWeb.Home do
     PubSub.subscribe(GrassFarmer.PubSub, "time_keeper")
     new_socket =
       assign(socket,
-        %{time_left: "1",
+        %{time_left: "0",
           watering_status: "off",
-          time: NaiveDateTime.local_now()}
+          time: StyleBlocks.time_format(NaiveDateTime.local_now(), :just_time),
+          zones: [%Zone{id: 1}]
+        }
       )
 
     {:ok, new_socket }
@@ -25,7 +28,7 @@ defmodule GrassFarmerWeb.Home do
           <div>
             <Schedule.quickview />
             <Weather.quickview />
-            <Zones.list />
+            <.live_component module={Zones} id="zones" zones={@zones}  />
           </div>
           <div>
             <Footer.controls watering_status={@watering_status} time_left={@time_left} />
@@ -36,8 +39,15 @@ defmodule GrassFarmerWeb.Home do
   end
 
   @impl true
+  def handle_event("add_zone", _params, socket) do
+    zone_max_id = socket.assigns.zones |> Enum.reduce(0, fn zone, acc -> max(zone.id, acc) end)
+    {:noreply, assign(socket, %{zones: [%Zone{id: zone_max_id + 1} | socket.assigns.zones]})}
+  end
+
+  @impl true
   def handle_info({:update_time, time}, socket) do
-    {:noreply, assign(socket, %{time: time})}
+    time_formatted = StyleBlocks.time_format(time, :just_time)
+    {:noreply, assign(socket, %{time: time_formatted})}
   end
 
 end

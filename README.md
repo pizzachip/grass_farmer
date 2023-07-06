@@ -104,5 +104,5 @@ gives you a chance to stop the build and add the environment variables or a clue
 why you are no longer able to access the device over WiFi.
 
 ## Special thanks
-Special thanks to Frank Hunleth, the beating heart of the Nerves Project, Alex McLain, host of the [Nerves Meetup](https://www.meetup.com/nerves/members/185556624/profile/), Bruce Tate from [Grox](https://www.grox.io) whose videos inspired me to get involved in Nerves in the first place, and, of course, Jose Valim, who brought us all Elixir! 
+Special thanks to Frank Hunleth, the beating heart of the Nerves Project, Alex McLain, host of the [Nerves Meetup](https://www.meetup.com/nerves/members/185556624/profile/), Bruce Tate from [Grox](https://www.grox.io) whose videos inspired me to get involved in Nerves in the first place, and, of course, Jose Valim, who brought us all Elixir! Special shout out also to Chris McCord, who brought us Phoenix and LiveView. 
 
