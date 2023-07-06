@@ -9,10 +9,10 @@ defmodule GrassFarmerWeb.Components.Weather do
       <.tile_row_wrapper>
         <.info_tile>
           <.weather_icon />
-          <.tile_text copy={%{title: "Currently", text: "Sunny" }}/>
+          <.tile_text copy={%{title: "Currently", text: "Sunny"}} />
         </.info_tile>
         <.info_tile>
-          <.tile_text copy={%{title: "Next Rain", text: "1 Aug" }}/>
+          <.tile_text copy={%{title: "Next Rain", text: "1 Aug"}} />
         </.info_tile>
       </.tile_row_wrapper>
     </div>

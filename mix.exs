@@ -3,7 +3,19 @@ defmodule GrassFarmer.MixProject do
 
   @app :grass_farmer
   @version "0.1.0"
-  @all_targets [:rpi, :rpi0, :rpi2, :rpi3, :rpi3a, :rpi4, :bbb, :osd32mp1, :x86_64, :grisp2, :mangopi_mq_pro]
+  @all_targets [
+    :rpi,
+    :rpi0,
+    :rpi2,
+    :rpi3,
+    :rpi3a,
+    :rpi4,
+    :bbb,
+    :osd32mp1,
+    :x86_64,
+    :grisp2,
+    :mangopi_mq_pro
+  ]
 
   def project do
     [

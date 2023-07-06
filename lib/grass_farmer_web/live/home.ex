@@ -7,34 +7,37 @@ defmodule GrassFarmerWeb.Home do
   @impl true
   def mount(_params, _session, socket) do
     PubSub.subscribe(GrassFarmer.PubSub, "time_keeper")
+
     new_socket =
-      assign(socket,
-        %{time_left: "0",
+      assign(
+        socket,
+        %{
+          time_left: "0",
           watering_status: "off",
           time: StyleBlocks.time_format(NaiveDateTime.local_now(), :just_time),
           zones: [%Zone{id: 1}]
         }
       )
 
-    {:ok, new_socket }
+    {:ok, new_socket}
   end
 
   @impl true
   def render(assigns) do
     ~H"""
-      <.page_title title="Suburban Grass Farmer" />
-      <.body>
-        <div class="flex flex-col h-full justify-between">
-          <div>
-            <Schedule.quickview />
-            <Weather.quickview />
-            <.live_component module={Zones} id="zones" zones={@zones}  />
-          </div>
-          <div>
-            <Footer.controls watering_status={@watering_status} time_left={@time_left} />
-          </div>
+    <.page_title title="Suburban Grass Farmer" />
+    <.body>
+      <div class="flex flex-col h-full justify-between">
+        <div>
+          <Schedule.quickview />
+          <Weather.quickview />
+          <.live_component module={Zones} id="zones" zones={@zones} />
         </div>
-      </.body>
+        <div>
+          <Footer.controls watering_status={@watering_status} time_left={@time_left} />
+        </div>
+      </div>
+    </.body>
     """
   end
 
@@ -49,5 +52,4 @@ defmodule GrassFarmerWeb.Home do
     time_formatted = StyleBlocks.time_format(time, :just_time)
     {:noreply, assign(socket, %{time: time_formatted})}
   end
-
 end

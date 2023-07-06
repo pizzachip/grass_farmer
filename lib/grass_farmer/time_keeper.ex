@@ -10,13 +10,13 @@ defmodule GrassFarmer.TimeKeeper do
     GenServer.start_link(__MODULE__, opts, name: __MODULE__)
   end
 
-  @ impl true
+  @impl true
   def init(state) do
     GenServer.cast(__MODULE__, :get_time)
     {:ok, state}
   end
 
-  @ impl true
+  @impl true
   def handle_cast(:get_time, state) do
     Process.sleep(@delay)
     time = NaiveDateTime.local_now()
@@ -24,5 +24,4 @@ defmodule GrassFarmer.TimeKeeper do
     GenServer.cast(__MODULE__, :get_time)
     {:noreply, state}
   end
-
 end
