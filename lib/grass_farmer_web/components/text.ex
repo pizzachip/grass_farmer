@@ -13,7 +13,7 @@ defmodule GrassFarmerWeb.Components.Text do
 
   def body(assigns) do
     ~H"""
-    <div class="mx-auto max-w-7xl py-2 sm:px-6 lg:px-8">
+    <div class="mx-auto h-full w-full py-2 sm:px-6 lg:px-8">
       <%= render_slot(@inner_block) %>
     </div>
     """

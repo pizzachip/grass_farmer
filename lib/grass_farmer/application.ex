@@ -14,9 +14,8 @@ defmodule GrassFarmer.Application do
         # Start the PubSub system
         {Phoenix.PubSub, name: GrassFarmer.PubSub},
         # Start the Endpoint (http/https)
-        GrassFarmerWeb.Endpoint
-        # Start a worker by calling: GrassFarmer.Worker.start_link(arg)
-        # {GrassFarmer.Worker, arg}
+        GrassFarmerWeb.Endpoint,
+        GrassFarmer.TimeKeeper
       ] ++ children(target())
 
     # See https://hexdocs.pm/elixir/Supervisor.html

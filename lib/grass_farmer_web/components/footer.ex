@@ -7,7 +7,7 @@ defmodule GrassFarmerWeb.Components.Footer do
   attr :time_left, :string
   def controls(assigns) do
     ~H"""
-    <div class="flex place-content-between fixed bottom-0 left-0 w-full bg-white p-3">
+    <div class="flex place-content-between w-full bg-white p-3">
       <div class="flex">
         <.left_button status={@watering_status} time_left={@time_left} />
         <%= if assigns[:watering_status]=="off" do %>
