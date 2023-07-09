@@ -17,3 +17,7 @@ config :logger, level: :info
 
 # Runtime production configuration, including reading
 # of environment variables, is done on config/runtime.exs.
+
+# Adapters
+config :grass_farmer,
+  persistence_adapter: GrassFarmer.PersistenceAdapter.Prod

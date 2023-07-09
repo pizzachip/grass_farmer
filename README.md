@@ -89,7 +89,7 @@ To run the firmware interactively:
 
 ```bash
 MIX_ENV=prod MIX_TARGET=host mix do deps.get, assets.deploy
-iex -S mix phx.server
+MIX_ENV=dev MIX_TARGET=host iex -S mix phx.server
 ```
 
 Network Configuration

@@ -1,22 +1,17 @@
 defmodule GrassFarmerWeb.Home do
   use GrassFarmerWeb, :live_view
   alias GrassFarmerWeb.Components.{Schedule, Weather, Zones, Footer, StyleBlocks}
-  alias GrassFarmer.Zone
+  alias GrassFarmer.{ Zone, PersistenceAdapter, Loader }
   alias Phoenix.PubSub
 
   @impl true
   def mount(_params, _session, socket) do
+    Loader.load()
     PubSub.subscribe(GrassFarmer.PubSub, "time_keeper")
 
     new_socket =
-      assign(
-        socket,
-        %{
-          time_left: "0",
-          watering_status: "off",
-          time: StyleBlocks.time_format(NaiveDateTime.local_now(), :just_time),
-          zones: [%Zone{id: 1}]
-        }
+      assign(socket,
+        Loader.translate() |> Map.merge(%{time: "00:00"})
       )
 
     {:ok, new_socket}
@@ -31,10 +26,11 @@ defmodule GrassFarmerWeb.Home do
         <div>
           <Schedule.quickview />
           <Weather.quickview />
+          <Schedule.list schedules={@schedules}/>
           <.live_component module={Zones} id="zones" zones={@zones} />
         </div>
         <div>
-          <Footer.controls watering_status={@watering_status} time_left={@time_left} />
+          <Footer.controls />
         </div>
       </div>
     </.body>
@@ -43,8 +39,18 @@ defmodule GrassFarmerWeb.Home do
 
   @impl true
   def handle_event("add_zone", _params, socket) do
-    zone_max_id = socket.assigns.zones |> Enum.reduce(0, fn zone, acc -> max(zone.id, acc) end)
-    {:noreply, assign(socket, %{zones: [%Zone{id: zone_max_id + 1} | socket.assigns.zones]})}
+    zone_max_id =
+      socket.assigns.zones
+      |> Enum.reduce(0, fn zone, acc -> max(zone.id, acc) end)
+      |> IO.inspect(label: "zone_max_id")
+
+    zones = socket.assigns.zones ++ [%Zone{id: zone_max_id + 1}]
+
+    PersistenceAdapter.new(%{set_name: "zones", configs: zones})
+    |> IO.inspect(label: "new adapter")
+    |> PersistenceAdapter.local_write
+
+    {:noreply, assign(socket, %{zones: zones})}
   end
 
   @impl true

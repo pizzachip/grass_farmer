@@ -75,6 +75,7 @@ defmodule GrassFarmer.MixProject do
       {:nerves_time_zones, "~> 0.3.2"},
       {:tesla, "~> 1.4"},
       {:hackney, "~> 1.17"},
+      {:property_table, "~> 0.2.3"},
 
       # Dependencies for all targets except :host
       {:nerves_runtime, "~> 0.13.0", targets: @all_targets},

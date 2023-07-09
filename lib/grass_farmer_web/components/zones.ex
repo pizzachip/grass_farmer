@@ -1,7 +1,7 @@
 defmodule GrassFarmerWeb.Components.Zones do
   use Phoenix.LiveComponent
 
-  alias GrassFarmer.Zone
+  alias GrassFarmer.{ Zone, PersistenceAdapter }
 
   import GrassFarmerWeb.Components.StyleBlocks
 
@@ -26,14 +26,7 @@ defmodule GrassFarmerWeb.Components.Zones do
     """
   end
 
-  @impl true
-  def handle_event("add_zone", _params, socket) do
-    zone_max_id = socket.assigns.zones |> Enum.reduce(0, fn zone, acc -> max(zone.id, acc) end)
-    {:noreply, assign(socket, %{zones: [%Zone{id: zone_max_id + 1} | socket.assigns.zones]})}
-  end
-
   attr :zone, :map, required: true
-
   def zone_card(assigns) do
     ~H"""
     <div class={bg_color(@zone.status) <> " each flex hover:shadow-lg select-none p-2 rounded-md border-gray-300 border mb-1 hover:border-gray-500 cursor-pointer"}>

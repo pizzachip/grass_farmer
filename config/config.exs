@@ -85,4 +85,14 @@ config :nerves_time_zones, default_time_zone: "America/Chicago"
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
+config :grass_farmer,
+  :set_names,
+  [
+    "global",
+    "zones",
+    "schedules",
+    "watering_logs",
+    "rain"
+  ]
+
 import_config "#{config_env()}.exs"

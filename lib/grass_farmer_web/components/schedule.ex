@@ -19,4 +19,13 @@ defmodule GrassFarmerWeb.Components.Schedule do
     </div>
     """
   end
+
+  attr :schedules, :list, required: true
+  def list(assigns) do
+    ~H"""
+      <%= for schedule <- @schedules do %>
+        <span style="px-4"><%= schedule.name %></span>
+      <% end %>
+    """
+  end
 end
