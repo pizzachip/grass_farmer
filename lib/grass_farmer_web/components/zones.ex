@@ -1,8 +1,6 @@
 defmodule GrassFarmerWeb.Components.Zones do
   use Phoenix.LiveComponent
 
-  alias GrassFarmer.{ Zone, PersistenceAdapter }
-
   import GrassFarmerWeb.Components.StyleBlocks
 
   @impl true
@@ -29,11 +27,11 @@ defmodule GrassFarmerWeb.Components.Zones do
   attr :zone, :map, required: true
   def zone_card(assigns) do
     ~H"""
-    <div class={bg_color(@zone.status) <> " each flex hover:shadow-lg select-none p-2 rounded-md border-gray-300 border mb-1 hover:border-gray-500 cursor-pointer"}>
+    <div class={bg_color(@zone["status"]) <> " each flex hover:shadow-lg select-none p-2 rounded-md border-gray-300 border mb-1 hover:border-gray-500 cursor-pointer"}>
       <div class="left">
         <div>
-          <span class="header text-blue-600 font-semibold text-lb"><%= @zone.name %></span>
-          <span class="text-gray-600 font-semibold text-sm"><%= @zone.id %></span>
+          <span class="header text-blue-600 font-semibold text-lb"><%= @zone["name"] %></span>
+          <span class="text-gray-600 font-semibold text-sm"><%= @zone["id"] %></span>
         </div>
       </div>
       <div class="right m-auto mr-0">

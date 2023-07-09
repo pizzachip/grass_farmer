@@ -24,7 +24,7 @@ defmodule GrassFarmerWeb.Components.Schedule do
   def list(assigns) do
     ~H"""
       <%= for schedule <- @schedules do %>
-        <span style="px-4"><%= schedule.name %></span>
+        <span style="px-4"><%= schedule["name"] %></span>
       <% end %>
     """
   end

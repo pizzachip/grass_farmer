@@ -24,7 +24,7 @@ defmodule GrassFarmer.Loader do
          configs}
       end
 
-    map_list |> Enum.into(%{})
+    map_list |> Enum.into(%{}) |> IO.inspect(label: "map_list")
   end
 
   defp exists_in_mem?(adapter) do
@@ -63,5 +63,5 @@ defmodule GrassFarmer.Loader do
     end
   end
 
-  defp set_names, do: Application.get_env(:grass_farmer, :set_names)
+  def set_names, do: Application.get_env(:grass_farmer, :set_names)
 end

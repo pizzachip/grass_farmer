@@ -3,14 +3,11 @@ defmodule GrassFarmerWeb.Components.Footer do
 
   import GrassFarmerWeb.Components.StyleBlocks
 
-  attr :watering_status, :string, required: true
-  attr :time_left, :string
-
   def render(assigns) do
     ~H"""
     <div class="flex place-content-between w-full bg-white p-3">
       <div class="flex">
-        <.left_button status={watering_status(@zones)} time_left={time_left(@zones, @status)} />
+        <.left_button status={watering_status(@zones)} time_left={time_left(@zones)} />
         <%= if assigns[:watering_status]=="off" do %>
           <.time_control />
         <% end %>
@@ -23,20 +20,21 @@ defmodule GrassFarmerWeb.Components.Footer do
   end
 
   defp watering_status(zones) do
-    Enum.filter(zones, fn zone -> zone.status == "on" end)
+    on_zones = Enum.filter(zones, fn zone -> zone["status"] == "on" end)
 
-    case Enum.count(zones) do
+    case Enum.count(on_zones) do
       0 -> "off"
       _ -> "on"
     end
   end
 
-  defp time_left(zones, status) do
+  defp time_left(zones) do
+    status = watering_status(zones) |> IO.inspect(label: "status in time_left")
     case status do
       "off" -> 0
       _ ->
         last_end = Enum.at(zones, -1)["end_time"]
-        NaiveDateTime.diff(NaiveDateTime.utc_now(), last_end, :second)
+        NaiveDateTime.diff(NaiveDateTime.local_now(), last_end, :second)
     end
   end
 
