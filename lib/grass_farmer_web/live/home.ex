@@ -42,6 +42,7 @@ defmodule GrassFarmerWeb.Home do
   def handle_event("add_zone", _params, socket) do
     zone_max_id =
       socket.assigns.zones
+      |> IO.inspect(label: "zone_max_id before reduce")
       |> Enum.reduce(0, fn zone, acc -> max(zone.id, acc) end)
       |> IO.inspect(label: "zone_max_id")
 

@@ -16,7 +16,9 @@ defmodule GrassFarmer.Loader do
 
   @spec translate() :: map()
   def translate() do
-    prop_list = PropertyTable.get_all(SettingsTable)
+    prop_list =
+      PropertyTable.get_all(SettingsTable)
+      |> IO.inspect(label: "prop_list")
 
     map_list =
       for {set_name, configs} <- prop_list do
@@ -30,6 +32,7 @@ defmodule GrassFarmer.Loader do
   defp exists_in_mem?(adapter) do
     data_set =
       PersistenceAdapter.local_read(adapter)
+      |> IO.inspect(label: "data_set")
 
       case data_set do
         nil -> adapter

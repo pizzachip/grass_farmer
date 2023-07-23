@@ -20,7 +20,7 @@ defmodule GrassFarmerWeb.Components.Footer do
   end
 
   defp watering_status(zones) do
-    on_zones = Enum.filter(zones, fn zone -> zone["status"] == "on" end)
+    on_zones = Enum.filter(zones, fn zone -> zone.status == "on" end)
 
     case Enum.count(on_zones) do
       0 -> "off"

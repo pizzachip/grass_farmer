@@ -15,7 +15,7 @@ defmodule GrassFarmer.PersistenceAdapter.Test do
   end
 
   defimpl Persist, for: Test do
-    def local_write(adapter) do
+    def local_write(_adapter) do
       :ok
     end
 
