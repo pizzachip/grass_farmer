@@ -1,4 +1,5 @@
 defmodule GrassFarmer.CoreDefaults do
+  alias GrassFarmer.Zone
 
   def values() do
     %{
@@ -7,11 +8,9 @@ defmodule GrassFarmer.CoreDefaults do
           location: "41.8781,-87.6298",
           weatherapi_key: ""
           },
-      "zones" => [%{id: 1,
+      "zones" => [%Zone{id: 1,
         name: "Edit to name me",
-        status: "off",
-        start_time: nil,
-        end_time: nil}],
+        status: "off"}],
       "schedules" =>
         [%{id: 1,
            name: "Default Schedule",
