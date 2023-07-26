@@ -36,6 +36,7 @@ defmodule GrassFarmer.Loader do
 
       case data_set do
         nil -> adapter
+
         _ -> :ok
       end
   end
@@ -43,6 +44,7 @@ defmodule GrassFarmer.Loader do
   defp load_from_persistence_if_needed(adapter) do
     case adapter do
       :ok -> :ok # already loaded - skips to next step
+
       _ ->
         data_set = PersistenceAdapter.load(adapter)
 
@@ -56,13 +58,13 @@ defmodule GrassFarmer.Loader do
   defp load_core_defaults_if_needed(adapter) do
     case adapter do
       :ok -> :ok # already loaded - skips to next step
+
       _ ->
         PersistenceAdapter.new(
           %{set_name: adapter.set_name,
           configs: CoreDefaults.values()[adapter.set_name]}
         )
         |> PersistenceAdapter.local_write
-
     end
   end
 

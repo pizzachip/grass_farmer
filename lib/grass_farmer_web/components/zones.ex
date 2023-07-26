@@ -31,14 +31,23 @@ defmodule GrassFarmerWeb.Components.Zones do
     ~H"""
     <div class={bg_color(@zone.status) <> " each flex hover:shadow-lg select-none p-2 rounded-md border-gray-300 border mb-1 hover:border-gray-500 cursor-pointer"}>
       <div class="left">
-        <div>
-          <span class="header text-blue-600 font-semibold text-lb"><%= @zone.name %></span>
-          <span class="text-gray-600 font-semibold text-sm"><%= @zone.id %></span>
+        <%= if @zone.edit do %> Editing
+        <% else %>
+            <span class="header text-blue-600 font-semibold text-lb"><%= @zone.name %></span>
+            <span class="text-gray-600 font-semibold text-sm"><%= @zone.id %></span>
+         <% end %>
+      </div>
+
+      <div class="right m-auto mr-0 flex space-x-4">
+        <div phx-click="edit_zone" phx-value-zone={@zone.id} >
+          <.edit_pencil />
+        </div>
+
+        <div phx-click="delete_zone" phx-value-zone={@zone.id} >
+          <.delete />
         </div>
       </div>
-      <div class="right m-auto mr-0">
-        <.edit_pencil />
-      </div>
+
     </div>
     """
   end
