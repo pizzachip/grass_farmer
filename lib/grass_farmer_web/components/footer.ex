@@ -29,7 +29,7 @@ defmodule GrassFarmerWeb.Components.Footer do
   end
 
   defp time_left(zones) do
-    status = watering_status(zones) |> IO.inspect(label: "status in time_left")
+    status = watering_status(zones)
     case status do
       "off" -> 0
       _ ->

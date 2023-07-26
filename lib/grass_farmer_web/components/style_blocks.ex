@@ -139,6 +139,12 @@ defmodule GrassFarmerWeb.Components.StyleBlocks do
     """
   end
 
+  def input(assigns) do
+    ~H"""
+    <input type="text" name={@field.name} id={@field.id} value={@field.value} />
+    """
+  end
+
   slot :inner_block, required: true
   attr :status, :string, required: true
 
