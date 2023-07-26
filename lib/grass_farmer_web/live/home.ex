@@ -38,44 +38,6 @@ defmodule GrassFarmerWeb.Home do
   end
 
 
-  @impl true
-  def handle_event("update_zone", params, socket) do
-    new_zones =
-      socket.assigns.zones
-      |> Enum.map(fn zone -> if zone.id == (params["zone_id"] |> String.to_integer), do: %Zone{zone | name: params["zone_name"], id: params["zone_id"], edit: false}, else: zone end)
-
-    PersistenceAdapter.new(%{set_name: "zones", configs: new_zones})
-     |> PersistenceAdapter.local_write
-
-    {:noreply, assign(socket, %{zones: new_zones})}
-  end
-
-
-  @impl true
-  def handle_event("edit_zone", %{"zone" => zone_id}, socket) do
-    new_zones =
-      socket.assigns.zones
-      |> Enum.map(fn zone -> if zone.id == (zone_id |> String.to_integer), do: %{zone | edit: true}, else: zone end)
-
-    PersistenceAdapter.new(%{set_name: "zones", configs: new_zones})
-    |> PersistenceAdapter.local_write
-
-    {:noreply,
-     assign(socket, %{zones: new_zones})}
-  end
-
-  @impl true
-  def handle_event("delete_zone", %{"zone" => zone_id}, socket) do
-    new_zones =
-      socket.assigns.zones
-      |> Enum.filter(fn zone -> zone.id != (zone_id |> String.to_integer) end)
-
-    PersistenceAdapter.new(%{set_name: "zones", configs: new_zones})
-    |> PersistenceAdapter.local_write
-
-    {:noreply,
-     assign(socket, %{zones: new_zones})}
-  end
 
   @impl true
   def handle_info({:update_time, time}, socket) do
