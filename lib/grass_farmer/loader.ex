@@ -18,7 +18,6 @@ defmodule GrassFarmer.Loader do
   def translate() do
     prop_list =
       PropertyTable.get_all(SettingsTable)
-      |> IO.inspect(label: "prop_list")
 
     map_list =
       for {set_name, configs} <- prop_list do
@@ -26,16 +25,16 @@ defmodule GrassFarmer.Loader do
          configs}
       end
 
-    map_list |> Enum.into(%{}) |> IO.inspect(label: "map_list")
+    map_list |> Enum.into(%{})
   end
 
   defp exists_in_mem?(adapter) do
     data_set =
       PersistenceAdapter.local_read(adapter)
-      |> IO.inspect(label: "data_set")
 
       case data_set do
         nil -> adapter
+
         _ -> :ok
       end
   end
@@ -43,6 +42,7 @@ defmodule GrassFarmer.Loader do
   defp load_from_persistence_if_needed(adapter) do
     case adapter do
       :ok -> :ok # already loaded - skips to next step
+
       _ ->
         data_set = PersistenceAdapter.load(adapter)
 
@@ -56,13 +56,13 @@ defmodule GrassFarmer.Loader do
   defp load_core_defaults_if_needed(adapter) do
     case adapter do
       :ok -> :ok # already loaded - skips to next step
+
       _ ->
         PersistenceAdapter.new(
           %{set_name: adapter.set_name,
           configs: CoreDefaults.values()[adapter.set_name]}
         )
         |> PersistenceAdapter.local_write
-
     end
   end
 

@@ -13,7 +13,6 @@ defmodule GrassFarmerWeb.Home do
       assign(socket,
         Loader.translate() |> Map.merge(%{time: NaiveDateTime.local_now()})
       )
-      |> IO.inspect(label: "new_socket")
 
     {:ok, new_socket}
   end
@@ -38,21 +37,44 @@ defmodule GrassFarmerWeb.Home do
     """
   end
 
+
   @impl true
-  def handle_event("add_zone", _params, socket) do
-    zone_max_id =
+  def handle_event("update_zone", params, socket) do
+    new_zones =
       socket.assigns.zones
-      |> IO.inspect(label: "zone_max_id before reduce")
-      |> Enum.reduce(0, fn zone, acc -> max(zone.id, acc) end)
-      |> IO.inspect(label: "zone_max_id")
+      |> Enum.map(fn zone -> if zone.id == (params["zone_id"] |> String.to_integer), do: %Zone{zone | name: params["zone_name"], id: params["zone_id"], edit: false}, else: zone end)
 
-    zones = socket.assigns.zones ++ [%Zone{id: zone_max_id + 1}]
+    PersistenceAdapter.new(%{set_name: "zones", configs: new_zones})
+     |> PersistenceAdapter.local_write
 
-    PersistenceAdapter.new(%{set_name: "zones", configs: zones})
-    |> IO.inspect(label: "new adapter")
+    {:noreply, assign(socket, %{zones: new_zones})}
+  end
+
+
+  @impl true
+  def handle_event("edit_zone", %{"zone" => zone_id}, socket) do
+    new_zones =
+      socket.assigns.zones
+      |> Enum.map(fn zone -> if zone.id == (zone_id |> String.to_integer), do: %{zone | edit: true}, else: zone end)
+
+    PersistenceAdapter.new(%{set_name: "zones", configs: new_zones})
     |> PersistenceAdapter.local_write
 
-    {:noreply, assign(socket, %{zones: zones})}
+    {:noreply,
+     assign(socket, %{zones: new_zones})}
+  end
+
+  @impl true
+  def handle_event("delete_zone", %{"zone" => zone_id}, socket) do
+    new_zones =
+      socket.assigns.zones
+      |> Enum.filter(fn zone -> zone.id != (zone_id |> String.to_integer) end)
+
+    PersistenceAdapter.new(%{set_name: "zones", configs: new_zones})
+    |> PersistenceAdapter.local_write
+
+    {:noreply,
+     assign(socket, %{zones: new_zones})}
   end
 
   @impl true
@@ -60,4 +82,5 @@ defmodule GrassFarmerWeb.Home do
     time_formatted = StyleBlocks.time_format(time, :just_time)
     {:noreply, assign(socket, %{time: time_formatted})}
   end
+
 end
