@@ -14,7 +14,7 @@ defmodule GrassFarmerWeb.Components.Zones do
           <div class="text-xl font-bold text-gray-600 mb-2">Watering Zones</div>
         </div>
         <%= for zone <- @zones do %>
-          <.zone_card zone={zone} />
+          <.zone_card zone={zone} myself={@myself} />
         <% end %>
       </div>
       <div class="flex justify-end">
@@ -27,12 +27,13 @@ defmodule GrassFarmerWeb.Components.Zones do
   end
 
   attr :zone, :map, required: true
+  attr :myself, :map, required: true
   def zone_card(assigns) do
     ~H"""
     <div class={bg_color(@zone.status) <> " each flex hover:shadow-lg select-none p-2 rounded-md border-gray-300 border mb-1 hover:border-gray-500 cursor-pointer"}>
       <div class="left">
         <%= if @zone.edit == true do %>
-          <form action="#" phx-submit="update_zone">
+          <form action="#" phx-submit="update_zone" phx-target={@myself}>
             <input type="text" name="zone_name" placeholder={@zone.name} />
             <input type="text" name="zone_id" placeholder={@zone.id} value={@zone.id} class="w-12 text-center"/>
             <input type="submit" value="update" class="text-blue-500 cursor-pointer pl-4">
@@ -44,11 +45,11 @@ defmodule GrassFarmerWeb.Components.Zones do
       </div>
 
       <div class="right m-auto mr-0 flex space-x-4">
-        <div phx-click="edit_zone" phx-value-zone={@zone.id} >
+        <div phx-click="edit_zone" phx-value-zone={@zone.id} phx-target={@myself} >
           <.edit_pencil />
         </div>
 
-        <div phx-click="delete_zone" phx-value-zone={@zone.id} >
+        <div phx-click="delete_zone" phx-value-zone={@zone.id} phx-target={@myself} >
           <.delete />
         </div>
       </div>
@@ -69,6 +70,45 @@ defmodule GrassFarmerWeb.Components.Zones do
     |> PersistenceAdapter.local_write
 
     {:noreply, assign(socket, %{zones: zones})}
+  end
+
+
+  @impl true
+  def handle_event("update_zone", params, socket) do
+    new_zones =
+      socket.assigns.zones
+      |> Enum.map(fn zone -> if zone.id == (params["zone_id"] |> String.to_integer), do: %Zone{zone | name: params["zone_name"], id: params["zone_id"], edit: false}, else: zone end)
+
+    PersistenceAdapter.new(%{set_name: "zones", configs: new_zones})
+     |> PersistenceAdapter.local_write
+
+    {:noreply, assign(socket, %{zones: new_zones})}
+  end
+
+  @impl true
+  def handle_event("edit_zone", %{"zone" => zone_id}, socket) do
+    new_zones =
+      socket.assigns.zones
+      |> Enum.map(fn zone -> if zone.id == (zone_id |> String.to_integer), do: %{zone | edit: true}, else: zone end)
+
+    PersistenceAdapter.new(%{set_name: "zones", configs: new_zones})
+    |> PersistenceAdapter.local_write
+
+    {:noreply,
+     assign(socket, %{zones: new_zones})}
+  end
+
+  @impl true
+  def handle_event("delete_zone", %{"zone" => zone_id}, socket) do
+    new_zones =
+      socket.assigns.zones
+      |> Enum.filter(fn zone -> zone.id != (zone_id |> String.to_integer) end)
+
+    PersistenceAdapter.new(%{set_name: "zones", configs: new_zones})
+    |> PersistenceAdapter.local_write
+
+    {:noreply,
+     assign(socket, %{zones: new_zones})}
   end
 
   defp bg_color(status) do
