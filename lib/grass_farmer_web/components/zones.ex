@@ -62,6 +62,7 @@ defmodule GrassFarmerWeb.Components.Zones do
   def handle_event("add_zone", _params, socket) do
     zone_max_id =
       socket.assigns.zones
+      |> IO.inspect(label: "socket.assigns.zones")
       |> Enum.reduce(0, fn zone, acc -> max(zone.id, acc) end)
 
     zones = socket.assigns.zones ++ [%Zone{id: zone_max_id + 1}]
@@ -75,12 +76,17 @@ defmodule GrassFarmerWeb.Components.Zones do
 
   @impl true
   def handle_event("update_zone", params, socket) do
+    zone_id = params["zone_id"] |> String.to_integer
+
     new_zones =
       socket.assigns.zones
-      |> Enum.map(fn zone -> if zone.id == (params["zone_id"] |> String.to_integer), do: %Zone{zone | name: params["zone_name"], id: params["zone_id"], edit: false}, else: zone end)
+      |> Enum.map(fn zone -> if zone.id == zone_id, do: %Zone{zone | name: params["zone_name"], id: zone_id, edit: false}, else: zone end)
 
     PersistenceAdapter.new(%{set_name: "zones", configs: new_zones})
      |> PersistenceAdapter.local_write
+
+    PersistenceAdapter.new(%{set_name: "zones", configs: new_zones})
+     |> PersistenceAdapter.save
 
     {:noreply, assign(socket, %{zones: new_zones})}
   end
