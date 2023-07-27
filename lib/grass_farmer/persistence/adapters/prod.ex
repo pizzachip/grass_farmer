@@ -28,11 +28,17 @@ defmodule GrassFarmer.PersistenceAdapter.Prod do
     end
 
     def load(_adapter) do
-      PropertyTable.get_snapshots(SettingsTable)
-      |> List.last
-      |> Tuple.to_list
-      |> List.first
-      |> ( fn id -> PropertyTable.restore_snapshot(SettingsTable, id) end ).()
+      snaps = PropertyTable.get_snapshots(SettingsTable)
+
+      case snaps do
+        [] -> nil
+        _ -> snaps
+              |> List.last
+              |> Tuple.to_list
+              |> List.first
+              |> ( fn id -> PropertyTable.restore_snapshot(SettingsTable, id) end ).()
+
+      end
     end
   end
 

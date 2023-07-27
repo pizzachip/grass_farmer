@@ -48,6 +48,7 @@ defmodule GrassFarmer.Loader do
 
         case data_set do
           nil -> adapter
+          []  -> adapter
           _ -> :ok
         end
     end
@@ -55,7 +56,7 @@ defmodule GrassFarmer.Loader do
 
   defp load_core_defaults_if_needed(adapter) do
     case adapter do
-      :ok -> :ok # already loaded - skips to next step
+      :ok -> :ok # already loaded - end of workflow
 
       _ ->
         PersistenceAdapter.new(
