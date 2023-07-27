@@ -1,7 +1,8 @@
 defmodule GrassFarmerWeb.Home do
   use GrassFarmerWeb, :live_view
+
   alias GrassFarmerWeb.Components.{Schedule, Weather, Zones, Footer, StyleBlocks}
-  alias GrassFarmer.{ Zone, PersistenceAdapter, Loader }
+  alias GrassFarmer.Loader
   alias Phoenix.PubSub
 
   @impl true
@@ -36,7 +37,6 @@ defmodule GrassFarmerWeb.Home do
     </.body>
     """
   end
-
 
 
   @impl true

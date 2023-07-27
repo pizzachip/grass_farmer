@@ -23,9 +23,17 @@ defmodule GrassFarmerWeb.Components.Schedule do
   attr :schedules, :list, required: true
   def list(assigns) do
     ~H"""
-      <%= for schedule <- @schedules do %>
-        <span style="px-4"><%= schedule["name"] %></span>
-      <% end %>
+      <div class="mb-1 mx-3">
+        <div class="flex">
+          <h2 class="text-xl font-bold text-gray-600">Schedules</h2>
+          <button class="text-xl font-bold ml-3" phx-click="add_schedule" >
+            +
+          </button>
+        </div>
+        <%= for schedule <- @schedules do %>
+          <span style="px-4"><%= schedule.name %></span>
+        <% end %>
+      </div>
     """
   end
 end
