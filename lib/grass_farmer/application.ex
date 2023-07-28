@@ -15,7 +15,7 @@ defmodule GrassFarmer.Application do
         {Phoenix.PubSub, name: GrassFarmer.PubSub},
         # Start the Endpoint (http/https)
         GrassFarmerWeb.Endpoint,
-        {PropertyTable, name: SettingsTable, persist_data_path: "/data"},
+        {PropertyTable, name: SettingsTable},
         GrassFarmer.TimeKeeper
       ] ++ children(target())
 
@@ -31,7 +31,6 @@ defmodule GrassFarmer.Application do
       # Children that only run on the host
       # Starts a worker by calling: GrassFarmer.Worker.start_link(arg)
       # {GrassFarmer.Worker, arg},
-
     ]
   end
 
@@ -40,7 +39,7 @@ defmodule GrassFarmer.Application do
       # Children for all targets except host
       # Starts a worker by calling: GrassFarmer.Worker.start_link(arg)
       # {GrassFarmer.Worker, arg},
-
+      {PropertyTable, name: SettingsTable, persist_data_path: "/data"}
     ]
   end
 
