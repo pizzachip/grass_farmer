@@ -23,7 +23,6 @@ defmodule GrassFarmer.PersistenceAdapter.Dev do
       PropertyTable.get(SettingsTable, [adapter.set_name])
     end
 
-    # Should not need in Dev
     def save(adapter) do
       case adapter.configs do
         nil -> :error
@@ -31,7 +30,6 @@ defmodule GrassFarmer.PersistenceAdapter.Dev do
       end
     end
 
-    # Should not need in Dev
     def load(adapter) do
       adapter.configs
     end

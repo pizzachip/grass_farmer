@@ -15,7 +15,7 @@ defmodule GrassFarmer.Application do
         {Phoenix.PubSub, name: GrassFarmer.PubSub},
         # Start the Endpoint (http/https)
         GrassFarmerWeb.Endpoint,
-        {PropertyTable, name: SettingsTable, path_to_data: "/data"},
+        {PropertyTable, name: SettingsTable, persist_data_path: "/data"},
         GrassFarmer.TimeKeeper
       ] ++ children(target())
 
