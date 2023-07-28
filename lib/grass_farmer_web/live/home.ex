@@ -7,7 +7,6 @@ defmodule GrassFarmerWeb.Home do
 
   @impl true
   def mount(_params, _session, socket) do
-    Loader.load()
     PubSub.subscribe(GrassFarmer.PubSub, "time_keeper")
 
     new_socket =

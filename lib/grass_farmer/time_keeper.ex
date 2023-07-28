@@ -2,6 +2,7 @@ defmodule GrassFarmer.TimeKeeper do
   use GenServer
 
   alias Phoenix.PubSub
+  alias GrassFarmer.Loader
 
   @delay 15_000
   @defaults %{current_time: NaiveDateTime.local_now()}
@@ -12,6 +13,10 @@ defmodule GrassFarmer.TimeKeeper do
 
   @impl true
   def init(state) do
+    # Not sure this is the final home for loading power-up data
+    # it seemed a waste to create another Genserver just for this one function call
+    Loader.load()
+
     GenServer.cast(__MODULE__, :get_time)
     {:ok, state}
   end

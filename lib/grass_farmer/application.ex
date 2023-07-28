@@ -15,8 +15,8 @@ defmodule GrassFarmer.Application do
         {Phoenix.PubSub, name: GrassFarmer.PubSub},
         # Start the Endpoint (http/https)
         GrassFarmerWeb.Endpoint,
-        GrassFarmer.TimeKeeper,
-        {PropertyTable, name: SettingsTable, path_to_data: "/data"}
+        {PropertyTable, name: SettingsTable, path_to_data: "/data"},
+        GrassFarmer.TimeKeeper
       ] ++ children(target())
 
     # See https://hexdocs.pm/elixir/Supervisor.html
