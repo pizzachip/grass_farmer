@@ -1,5 +1,5 @@
 defmodule GrassFarmer.CoreDefaults do
-  alias GrassFarmer.Zone
+  alias GrassFarmer.{ Zone, Schedule }
 
   def values() do
     %{
@@ -12,11 +12,12 @@ defmodule GrassFarmer.CoreDefaults do
         name: "Edit to name me",
         status: "off"}],
       "schedules" =>
-        [%{id: 1,
-           name: "Default Schedule",
-           days: "1357",
-           start_time: "07:00",
-           duration_mins: [%{zone_id: 1, duration: "10"}]
+        [%Schedule{id: 1,
+           name: "Example Schedule - not active",
+           start_time: ~T[07:00:00],
+           zones: [%{order: 1, zone_id: 1, duration: 10}],
+           days: [1,3,5,7],
+           status: :inactive
         }],
       "watering_logs" => [], # format | [%{"zone_id" => 1, "start_time" => "", "end_time" => ""}]
       "rain" =>

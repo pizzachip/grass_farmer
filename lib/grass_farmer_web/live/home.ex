@@ -1,7 +1,12 @@
 defmodule GrassFarmerWeb.Home do
   use GrassFarmerWeb, :live_view
 
-  alias GrassFarmerWeb.Components.{Schedule, Weather, Zones, Footer, StyleBlocks}
+  alias GrassFarmerWeb.Components.{Schedule,
+    ScheduleManager,
+    Weather,
+    Zones,
+    Footer,
+    StyleBlocks}
   alias GrassFarmer.Loader
   alias Phoenix.PubSub
 
@@ -26,7 +31,7 @@ defmodule GrassFarmerWeb.Home do
         <div>
           <Schedule.quickview />
           <Weather.quickview />
-          <Schedule.list schedules={@schedules}/>
+          <.live_component module={ScheduleManager} id="schedules" zones={@zones} schedules={@schedules} />
           <.live_component module={Zones} id="zones" zones={@zones} />
         </div>
         <div>

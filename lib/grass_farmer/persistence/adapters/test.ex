@@ -7,7 +7,7 @@ defmodule GrassFarmer.PersistenceAdapter.Test do
     can be any data type.
     This implies that data should be saved in 'sets' but can be lists, maps, etc.
   """
-  alias GrassFarmer.{ Persist, Zone, WaterSchedule }
+  alias GrassFarmer.{ Persist, Zone, Schedule }
   alias GrassFarmer.PersistenceAdapter.Test
 
   def new(adapter) do
@@ -22,7 +22,7 @@ defmodule GrassFarmer.PersistenceAdapter.Test do
     def local_read(adapter) do
       case adapter.set_name do
         "zones"     -> [%Zone{id: 1}]
-        "schedules" -> [%WaterSchedule{id: 1, name: "Schedule 1"}, %WaterSchedule{id: 2, name: "Schedule 2"}]
+        "schedules" -> [%Schedule{id: 1, name: "Schedule 1"}, %Schedule{id: 2, name: "Schedule 2"}]
         _           -> []
       end
     end
