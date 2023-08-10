@@ -85,7 +85,7 @@ MIX_ENV=prod MIX_TARGET=host mix do deps.get, assets.deploy
 MIX_ENV=prod MIX_TARGET=mangopi_mq_pro mix do deps.get, firmware, upload grass_farmer.local
 ```
 
-To run the firmware interactively:
+To run the firmware interactively in the host environment:
 
 ```bash
 MIX_ENV=prod MIX_TARGET=host mix do deps.get, assets.deploy

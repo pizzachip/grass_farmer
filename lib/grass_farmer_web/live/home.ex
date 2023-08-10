@@ -16,7 +16,8 @@ defmodule GrassFarmerWeb.Home do
 
     new_socket =
       assign(socket,
-        Loader.translate() |> Map.merge(%{time: NaiveDateTime.local_now()})
+        Loader.translate()
+        |> Map.merge(%{time: NaiveDateTime.local_now(), edit_schedule: false})
       )
 
     {:ok, new_socket}
@@ -31,7 +32,7 @@ defmodule GrassFarmerWeb.Home do
         <div>
           <Schedule.quickview />
           <Weather.quickview />
-          <.live_component module={ScheduleManager} id="schedules" zones={@zones} schedules={@schedules} />
+          <.live_component module={ScheduleManager} id="schedules" zones={@zones} schedules={@schedules} edit={@edit_schedule} />
           <.live_component module={Zones} id="zones" zones={@zones} />
         </div>
         <div>
