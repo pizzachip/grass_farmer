@@ -1,9 +1,19 @@
 defmodule GrassFarmer.Schedule do
-  defstruct [:id,
-    :name,
-    :start_time,
-    :zones,
-    :days,
-    :edit,
-    :status]
+  use Ecto.Schema
+  import Ecto.Changeset
+
+  embedded_schema do
+    field :name, :string
+    field :start_time, :time, default: ~T[07:00:00]
+    field :zones, {:array, :integer}, default: [1]
+    field :days, {:array, :integer}, default: [1,3,5,7]
+    field :edit, :boolean, default: false
+    field :status, :string, default: "off"
+  end
+
+  def changeset(schedule, params \\ %{}) do
+    schedule
+    |> cast(params, [:name, :start_time, :zones, :days])
+    |> validate_required([:name, :start_time, :zones, :days])
+  end
 end

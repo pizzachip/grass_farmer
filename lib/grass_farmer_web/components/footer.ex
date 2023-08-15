@@ -7,7 +7,7 @@ defmodule GrassFarmerWeb.Components.Footer do
     ~H"""
     <div class="flex place-content-between w-full bg-white p-3">
       <div class="flex">
-        <.left_button status={watering_status(@zones)} time_left={time_left(@zones)} />
+        <.left_button status={watering_status(@schedules)} time_left={time_left(@schedules)} />
         <%= if assigns[:watering_status]=="off" do %>
           <.time_control />
         <% end %>
@@ -19,23 +19,18 @@ defmodule GrassFarmerWeb.Components.Footer do
     """
   end
 
-  defp watering_status(zones) do
-    on_zones = Enum.filter(zones, fn zone -> zone.status == "on" end)
+  defp watering_status(schedules) do
+    running_schedules = Enum.filter(schedules, fn schedule -> schedule.status == "on" end)
 
-    case Enum.count(on_zones) do
+    case Enum.count(running_schedules) do
       0 -> "off"
       _ -> "on"
     end
   end
 
-  defp time_left(zones) do
-    status = watering_status(zones)
-    case status do
-      "off" -> 0
-      _ ->
-        last_end = Enum.at(zones, -1)["end_time"]
-        NaiveDateTime.diff(NaiveDateTime.local_now(), last_end, :second)
-    end
+  defp time_left(_schedules) do
+    # Need to move data structure to schedule event - drive from GenServer
+    0
   end
 
   attr :time_left, :string, required: true

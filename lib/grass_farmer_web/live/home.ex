@@ -36,7 +36,7 @@ defmodule GrassFarmerWeb.Home do
           <.live_component module={Zones} id="zones" zones={@zones} />
         </div>
         <div>
-          <.live_component module={Footer}  id="footer" zones={@zones} />
+          <.live_component module={Footer}  id="footer" zones={@zones} schedules={@schedules} />
         </div>
       </div>
     </.body>

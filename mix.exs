@@ -76,6 +76,8 @@ defmodule GrassFarmer.MixProject do
       {:tesla, "~> 1.4"},
       {:hackney, "~> 1.17"},
       {:property_table, "~> 0.2.3"},
+      {:ecto, "~> 3.10.3"},
+      {:heroicons_liveview, "~> 0.3.0"},
 
       # Dependencies for all targets except :host
       {:nerves_runtime, "~> 0.13.0", targets: @all_targets},

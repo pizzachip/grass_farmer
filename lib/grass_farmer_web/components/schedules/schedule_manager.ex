@@ -1,24 +1,25 @@
 defmodule GrassFarmerWeb.Components.ScheduleManager do
   use Phoenix.LiveComponent
 
-  alias GrassFarmer.{Schedule, PersistenceAdapter}
+  alias GrassFarmer.{Schedule}
+  import Ecto.Changeset
 
   @impl true
   def render(assigns) do
     ~H"""
     <div>
-      <%= if @edit do %>
-        <.schedule_modal_form myself={@myself} />
-      <% end %>
       <div class="mb-1 mx-3">
         <div class="flex">
           <h2 class="text-xl font-bold text-gray-600">Schedules</h2>
-          <button class="text-xl font-bold ml-3" phx-click="add_schedule" phx-target={@myself} >
+          <button class="text-xl font-bold ml-3" phx-click="create_schedule" phx-target={@myself} >
             +
           </button>
         </div>
         <%= for schedule <- @schedules do %>
-          <span style="px-4"><%= schedule.name %></span>
+          <span style="px-4" phx-click="edit_schedule" phx-value-id={schedule.id} phx-target={@myself} ><%= schedule.name %></span>
+          <%= if schedule.edit == true do %>
+            <.schedule_modal_form myself={@myself} />
+          <% end %>
         <% end %>
       </div>
 
@@ -66,19 +67,33 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
   end
 
   @impl true
-  def handle_event("add_schedule", _params, socket) do
-    schedule_max_id =
-        socket.assigns.schedules
-        |> Enum.reduce(0, fn schedule, acc -> max(schedule.id, acc) end)
+  def handle_event("create_schedule", _params, socket) do
+    case Schedule.changeset(%Schedule{}, %{name: "New Schedule", edit: true}) do
+      %{valid?: true} = changeset ->
+        schedule =
+          apply_changes(changeset)
+          |> Map.put(:id, Ecto.UUID.generate())
 
-    schedules =
-      socket.assigns.schedules ++ [%Schedule{id: schedule_max_id + 1, name: "New Schedule"}]
+        { :noreply,
+           assign(socket, %{schedules: socket.assigns.schedules ++ [schedule]})
+        }
 
-    PersistenceAdapter.new(%{set_name: "schedules", configs: schedules})
-    |> PersistenceAdapter.local_write
+      _ ->
+        {:noreply, assign(socket, %{edit: false}) |> IO.inspect(label: "assigns fail")}
+    end
+  end
 
-
-    {:noreply, assign(socket, %{schedules: schedules, edit: true})}
+  def handle_event("edit_schedule", params, socket) do
+    new_schedules =
+      socket.assigns.schedules
+      |> Enum.map(fn schedule ->
+        if schedule.id == params["id"] do
+          Map.put(schedule, :edit, true)
+        else
+          Map.put(schedule, :edit, false)
+        end
+      end)
+    {:noreply, assign(socket, %{schedules: new_schedules})}
   end
 
   @impl true

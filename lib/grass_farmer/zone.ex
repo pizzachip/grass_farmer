@@ -1,11 +1,17 @@
 defmodule GrassFarmer.Zone do
-  defstruct [
-    :id,
-    name: "e.g. Front Yard",
-    status: "off",
-    edit: false,
-    last_watered: ~N[1776-07-04 12:34:56],
-    next_watering: NaiveDateTime.add(NaiveDateTime.local_now(), 86_400, :second),
-    watering_time_left: 0
-  ]
+
+  use Ecto.Schema
+  import Ecto.Changeset
+
+  embedded_schema do
+    field :sprinkler_zone, :integer
+    field :name, :string, default: "edit to name me"
+    field :edit, :boolean, default: false
+  end
+
+  def changeset(zone, params \\ %{}) do
+    zone
+    |> cast(params, [:name, :status])
+    |> validate_required([:name, :status])
+  end
 end
