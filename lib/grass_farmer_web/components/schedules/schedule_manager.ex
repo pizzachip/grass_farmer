@@ -68,19 +68,11 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
 
   @impl true
   def handle_event("create_schedule", _params, socket) do
-    case Schedule.changeset(%Schedule{}, %{name: "New Schedule", edit: true}) do
-      %{valid?: true} = changeset ->
-        schedule =
-          apply_changes(changeset)
-          |> Map.put(:id, Ecto.UUID.generate())
+    schedule = %Schedule{name: "New Schedule", edit: true}
 
-        { :noreply,
-           assign(socket, %{schedules: socket.assigns.schedules ++ [schedule]})
-        }
-
-      _ ->
-        {:noreply, assign(socket, %{edit: false}) |> IO.inspect(label: "assigns fail")}
-    end
+    { :noreply,
+       assign(socket, %{schedules: socket.assigns.schedules ++ [schedule]})
+    }
   end
 
   def handle_event("edit_schedule", params, socket) do
