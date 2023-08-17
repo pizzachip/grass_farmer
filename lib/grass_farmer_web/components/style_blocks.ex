@@ -2,7 +2,6 @@ defmodule GrassFarmerWeb.Components.StyleBlocks do
   use Phoenix.Component
 
   slot :inner_block, required: true
-
   def tile_row_wrapper(assigns) do
     ~H"""
     <div class="flex items-start text-gray-800">
@@ -16,7 +15,6 @@ defmodule GrassFarmerWeb.Components.StyleBlocks do
   end
 
   slot :inner_block, required: true
-
   def info_tile(assigns) do
     ~H"""
     <div class="col-span-1 shadow">
@@ -27,8 +25,49 @@ defmodule GrassFarmerWeb.Components.StyleBlocks do
     """
   end
 
-  attr :copy, :map, required: true
+  slot :inner_block, required: true
+  attr :myself, :map, required: true
+  attr :schedule, :map, required: true
+  def modal_wrapper(assigns) do
+    ~H"""
+    <div class="flex justify-center h-screen w-screen top-0 left-0 fixed items-center bg-green-200/75 antialiased" phx-click="cancel_edit" phx-target={@myself}>
+      <div class="flex flex-col w-11/12 sm:w-5/6 lg:w-1/2 max-w-2xl mx-auto rounded-lg border border-gray-300 shadow-xl" phx-click="" phx-target={@myself}>
+        <%= render_slot(@inner_block) %>
+      </div>
+    </div>
+    """
+  end
 
+  slot :inner_block, required: true
+  attr :form_title, :string, required: true
+  attr :myself, :map, required: true
+  def modal_form(assigns) do
+    ~H"""
+    <div class="flex flex-row justify-between p-6 bg-white border-b border-gray-200 rounded-tl-lg rounded-tr-lg">
+      <p class="font-semibold text-gray-800"><%= @form_title %></p>
+      <div phx-click="cancel_edit" phx-target={@myself} >
+        <.close_x />
+      </div>
+    </div>
+    <%= render_slot(@inner_block) %>
+    <div class="flex flex-row items-center justify-between p-5 bg-white border-t border-gray-200 rounded-bl-lg rounded-br-lg" >
+      <p class="font-semibold text-blue-600 cursor-pointer" phx-click="cancel_edit" phx-target={@myself} >Cancel</p>
+      <button class="px-4 py-2 text-white font-semibold bg-blue-500 rounded">
+        Save
+      </button>
+    </div>
+    """
+  end
+
+  def close_x(assigns) do
+    ~H"""
+    <svg class="w-6 h-6 cursor-pointer" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+    </svg>
+    """
+  end
+
+  attr :copy, :map, required: true
   def tile_text(assigns) do
     ~H"""
     <div class="flex flex-col flex-grow ml-4">

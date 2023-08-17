@@ -3,6 +3,7 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
 
   alias GrassFarmer.{Schedule}
   import Ecto.Changeset
+  import GrassFarmerWeb.Components.StyleBlocks
 
   @impl true
   def render(assigns) do
@@ -18,7 +19,7 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
         <%= for schedule <- @schedules do %>
           <span style="px-4" phx-click="edit_schedule" phx-value-id={schedule.id} phx-target={@myself} ><%= schedule.name %></span>
           <%= if schedule.edit == true do %>
-            <.schedule_modal_form myself={@myself} />
+            <.schedule_modal_form myself={@myself} schedule={schedule} />
           <% end %>
         <% end %>
       </div>
@@ -28,41 +29,19 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
   end
 
   attr :myself, :map, required: true
+  attr :schedule, Schedule, required: true
   def schedule_modal_form(assigns) do
     ~H"""
-      <div class="flex justify-center h-screen w-screen top-0 left-0 fixed items-center bg-green-200/75 antialiased" phx-click="cancel_edit" phx-target={@myself}>
-      <div class="flex flex-col w-11/12 sm:w-5/6 lg:w-1/2 max-w-2xl mx-auto rounded-lg border border-gray-300 shadow-xl" phx-click="" phx-target={@myself}>
-        <div
-          class="flex flex-row justify-between p-6 bg-white border-b border-gray-200 rounded-tl-lg rounded-tr-lg"
-        >
-          <p class="font-semibold text-gray-800">Add a schedule</p>
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" phx-click="cancel_edit" phx-target={@myself}>
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-          </svg>
-        </div>
+    <.modal_wrapper myself={@myself} schedule={@schedule}>
+      <.modal_form myself={@myself} form_title="Create New Schedule">
         <div class="flex flex-col px-6 py-5 bg-gray-50">
-          <p class="mb-2 font-semibold text-gray-700">Name</p>
-          <text
-            type="text"
-            name=""
-            class="p-5 mb-5 bg-white border border-gray-200 rounded shadow-sm h-36"
-            id=""
-          ></text>
-          <div class="flex flex-col sm:flex-row items-center mb-5 sm:space-x-5">
-            <h2>Select Zones</h2>
-          </div>
-          <hr />
+          <.form  phx-submit="submit_schedule">
+            <input type="text" />
+            <button type="submit">Submit</button>
+          </.form>
         </div>
-        <div
-          class="flex flex-row items-center justify-between p-5 bg-white border-t border-gray-200 rounded-bl-lg rounded-br-lg"
-        >
-          <p class="font-semibold text-gray-600">Cancel</p>
-          <button class="px-4 py-2 text-white font-semibold bg-blue-500 rounded">
-            Save
-          </button>
-        </div>
-      </div>
-    </div>
+      </.modal_form>
+    </.modal_wrapper>
     """
   end
 
@@ -79,7 +58,7 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
     new_schedules =
       socket.assigns.schedules
       |> Enum.map(fn schedule ->
-        if schedule.id == params["id"] do
+        if schedule.id == params["id"] |> String.to_integer do
           Map.put(schedule, :edit, true)
         else
           Map.put(schedule, :edit, false)
@@ -88,8 +67,21 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
     {:noreply, assign(socket, %{schedules: new_schedules})}
   end
 
-  @impl true
-  def handle_event("cancel_edit", _params, socket) do
-    {:noreply, assign(socket, %{edit: false})}
+  def handle_event("submit_schedule", params, socket) do
+    {:noreply, socket}
   end
+
+  @impl true
+  def handle_event("cancel_edit", params, socket) do
+    updated_list =
+      socket.assigns.schedules
+      |> Enum.map(fn schedule -> Map.put(schedule, :edit, false) end)
+      |> Enum.filter(fn schedule -> schedule.id != nil end)
+
+    {
+      :noreply,
+      assign(socket, %{schedules: updated_list})
+    }
+  end
+
 end
