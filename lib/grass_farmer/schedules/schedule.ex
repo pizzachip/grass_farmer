@@ -5,10 +5,10 @@ defmodule GrassFarmer.Schedule do
   embedded_schema do
     field :name, :string
     field :start_time, :time, default: ~T[07:00:00]
-    field :zones, {:array, :integer}, default: [1]
+    field :zones, {:array, :map}, default: []
     field :days, {:array, :integer}, default: [1,3,5,7]
     field :edit, :boolean, default: false
-    field :status, :string, default: "off"
+    field :status, Ecto.Enum, values: [:on, :off], default: :off
   end
 
   def changeset(schedule, params \\ %{}) do

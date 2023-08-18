@@ -10,7 +10,7 @@ defmodule GrassFarmer.CoreDefaults do
           },
       "zones" => [%Zone{sprinkler_zone: 1}],
       "schedules" =>
-        [%Schedule{id: 1, name: "default"}],
+        [%Schedule{id: 1, name: "default", zones: [%{"sprinkler_zone" => 1, "duration" => 12}]}],
       "watering_logs" => [], # format | [%{"zone_id" => 1, "start_time" => "", "end_time" => ""}]
       "rain" =>
         %{ today: 0,

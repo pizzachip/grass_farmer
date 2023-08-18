@@ -62,7 +62,6 @@ defmodule GrassFarmerWeb.Components.Zones do
   def handle_event("create_zone", _params, socket) do
     zone_max_id =
       socket.assigns.zones
-      |> IO.inspect(label: "sa zones")
       |> Enum.reduce(0, fn zone, acc -> max(zone.sprinkler_zone, acc) end)
 
     zones = socket.assigns.zones ++ [%Zone{sprinkler_zone: zone_max_id + 1}]
