@@ -13,7 +13,7 @@ defmodule GrassFarmer.Schedule do
 
   def changeset(schedule, params \\ %{}) do
     schedule
-    |> cast(params, [:name, :start_time, :zones, :days])
+    |> cast(params, [:name, :start_time, :zones, :days, :edit, :status])
     |> validate_required([:name, :start_time, :zones, :days])
   end
 end
