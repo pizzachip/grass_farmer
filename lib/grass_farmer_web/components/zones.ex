@@ -35,7 +35,7 @@ defmodule GrassFarmerWeb.Components.Zones do
         <%= if @zone.edit == true do %>
           <form action="#" phx-submit="update_zone" phx-target={@myself}>
             <input type="text" name="zone_name" value={@zone.name} />
-            <input type="text" name="zone_id" placeholder={@zone.sprinkler_zone} value={@zone.sprinkler_zone} class="w-12 text-center"/>
+            <input type="text" name="sprinkler_zone" placeholder={@zone.sprinkler_zone} value={@zone.sprinkler_zone} class="w-12 text-center"/>
             <input type="submit" value="update" class="text-blue-500 cursor-pointer pl-4">
           </form>
         <% else %>
@@ -68,33 +68,31 @@ defmodule GrassFarmerWeb.Components.Zones do
 
     PersistenceAdapter.new(%{set_name: "zones", configs: zones})
     |> PersistenceAdapter.local_write
+    |> PersistenceAdapter.save
 
     {:noreply, assign(socket, %{zones: zones})}
   end
 
-
   @impl true
   def handle_event("update_zone", params, socket) do
-    zone_id = params["zone_id"] |> String.to_integer
+    sprinkler_zone = params["sprinkler_zone"] |> String.to_integer
 
     new_zones =
       socket.assigns.zones
-      |> Enum.map(fn zone -> if zone.sprinkler_zone == zone_id, do: %Zone{zone | name: params["zone_name"], id: zone_id, edit: false}, else: zone end)
+      |> Enum.map(fn zone -> if zone.sprinkler_zone == sprinkler_zone, do: %Zone{zone | name: params["zone_name"], id: sprinkler_zone, edit: false}, else: zone end)
 
     PersistenceAdapter.new(%{set_name: "zones", configs: new_zones})
      |> PersistenceAdapter.local_write
-
-    PersistenceAdapter.new(%{set_name: "zones", configs: new_zones})
      |> PersistenceAdapter.save
 
     {:noreply, assign(socket, %{zones: new_zones})}
   end
 
   @impl true
-  def handle_event("edit_zone", %{"zone" => zone_id}, socket) do
+  def handle_event("edit_zone", %{"zone" => sprinkler_zone}, socket) do
     new_zones =
       socket.assigns.zones
-      |> Enum.map(fn zone -> if zone.sprinkler_zone == (zone_id |> String.to_integer), do: %{zone | edit: true}, else: zone end)
+      |> Enum.map(fn zone -> if zone.sprinkler_zone == (sprinkler_zone |> String.to_integer), do: %{zone | edit: true}, else: zone end)
 
     PersistenceAdapter.new(%{set_name: "zones", configs: new_zones})
     |> PersistenceAdapter.local_write
@@ -104,13 +102,14 @@ defmodule GrassFarmerWeb.Components.Zones do
   end
 
   @impl true
-  def handle_event("delete_zone", %{"zone" => zone_id}, socket) do
+  def handle_event("delete_zone", %{"zone" => sprinkler_zone}, socket) do
     new_zones =
       socket.assigns.zones
-      |> Enum.filter(fn zone -> zone.sprinkler_zone != (zone_id |> String.to_integer) end)
+      |> Enum.filter(fn zone -> zone.sprinkler_zone != (sprinkler_zone |> String.to_integer) end)
 
     PersistenceAdapter.new(%{set_name: "zones", configs: new_zones})
     |> PersistenceAdapter.local_write
+    |> PersistenceAdapter.save
 
     {:noreply,
      assign(socket, %{zones: new_zones})}

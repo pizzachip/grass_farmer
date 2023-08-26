@@ -8,10 +8,9 @@ defmodule GrassFarmer.CoreDefaults do
           location: "41.8781,-87.6298",
           weatherapi_key: ""
           },
-      "zones" => [%Zone{sprinkler_zone: 1}],
-      "schedules" =>
-        [%Schedule{id: 1, name: "default", zones: [%{"sprinkler_zone" => 1, "duration" => 12}]}],
-      "watering_logs" => [], # format | [%{"zone_id" => 1, "start_time" => "", "end_time" => ""}]
+      "zones" => [%Zone{name: "Front Yard", sprinkler_zone: 1}],
+      "schedules" => [%Schedule{name: "Default Schedule"}],
+      "watering_logs" => [],
       "rain" =>
         %{ today: 0,
            last_rain: nil,

@@ -1,6 +1,6 @@
 defmodule GrassFarmer.Zone do
-
   use Ecto.Schema
+  @primary_key {:id, :binary_id, [ autogenerate: false, default: Ecto.UUID.generate ]}
   import Ecto.Changeset
 
   embedded_schema do
@@ -11,7 +11,7 @@ defmodule GrassFarmer.Zone do
 
   def changeset(zone, params \\ %{}) do
     zone
-    |> cast(params, [:name, :status])
-    |> validate_required([:name, :status])
+    |> cast(params, [:name, :sprinkler_zone, :edit])
+    |> validate_required([:name, :sprinkler_zone, :edit])
   end
 end

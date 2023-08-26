@@ -42,10 +42,11 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
           <input type="text" name="name" value={@schedule.name} />
           </div>
           <h3>Zones</h3>
-          <%= for zone <- @schedule.zones do %>
-            <span><%= zone_name(zone["sprinkler_zone"], @zones) %></span>
-            <input type="text" name="zone_id" value={zone["sprinkler_zone"]} />
-            <input type="number" name="duration" value={zone["duration"]} />
+          <%= for zone <- @zones do %>
+            <p>
+              <span><%= zone.name %></span>
+              <span><%= zone.sprinkler_zone %></span>
+            </p>
           <% end %>
         </.modal_form>
       </form>
@@ -58,22 +59,14 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
     schedule = %Schedule{name: "New Schedule", edit: true}
 
     { :noreply,
-       assign(socket, %{schedules: socket.assigns.schedules ++ [schedule]} |> IO.inspect(label: "created schedule"))
+       assign(socket, %{schedules: socket.assigns.schedules ++ [schedule]})
     }
   end
 
   @impl true
   def handle_event("edit_schedule", params, socket) do
-    new_schedules =
-      socket.assigns.schedules
-      |> Enum.map(fn schedule ->
-        if schedule.id == params["id"] |> String.to_integer do
-          Map.put(schedule, :edit, true)
-        else
-          Map.put(schedule, :edit, false)
-        end
-      end)
-    {:noreply, assign(socket, %{schedules: new_schedules})}
+
+    {:noreply, socket}
   end
 
   @impl true
@@ -118,8 +111,8 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
   end
 
   @spec zone_name(integer(), list(Zone)) :: String.t()
-  defp zone_name(zone_id, zones) do
-    Enum.find_value(zones, fn zone -> zone.id == zone_id end, fn zone -> zone.name end)
+  defp zone_name(sprinkler_zone, zones) do
+    Enum.find_value(zones, fn zone -> zone.id == sprinkler_zone end, fn zone -> zone.name end)
   end
 
 end
