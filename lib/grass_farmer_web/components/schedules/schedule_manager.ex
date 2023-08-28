@@ -12,9 +12,7 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
       <div class="mb-1 mx-3">
         <div class="flex">
           <h2 class="text-xl font-bold text-gray-600">Schedules</h2>
-          <button class="text-xl font-bold ml-3" phx-click="create_schedule" phx-target={@myself} >
-            +
-          </button>
+          <button class="text-xl font-bold ml-3" phx-click="create_schedule" phx-target={@myself} > + </button>
         </div>
         <%= for schedule <- @schedules do %>
           <span style="px-4" phx-click="edit_schedule" phx-value-id={schedule.id} phx-target={@myself} ><%= schedule.name %></span>
@@ -23,7 +21,6 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
           <% end %>
         <% end %>
       </div>
-
     </div>
     """
   end
@@ -36,18 +33,35 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
     <.modal_wrapper myself={@myself} schedule={@schedule}  form_title="Update Schedule" >
       <form action="#" phx-submit="submit_schedule" phx-target={@myself}>
         <.modal_form myself={@myself}>
-          <input type="hidden" name="id" value={@schedule.id} />
-
-          <div><span>Schedule name</span>
-          <input type="text" name="name" value={@schedule.name} />
+          <div class="py-5">
+            <div class="pb-5">
+              <input type="hidden" name="id" value={@schedule.id} />
+              <label class="pr-5">Name</label><input type="text" name="name" value={@schedule.name} />
+              </div>
+            <label class="pr-5">Start Time</label>
+            <select name="start_hour">
+              <%= for hour <- 0..12 do %>
+                <option value={hour} ><%= hour %></option>
+              <% end %>
+            </select>
+            <select name="start_minute">
+              <%= for minute <- 0..12 do %>
+                <option value={minute * 5} ><%= minute * 5 %></option>
+              <% end %>
+            </select>
+            <select name="start_am_pm">
+                <option value="AM" >AM</option>
+                <option value="PM" >PM</option>
+            </select>
           </div>
-          <h3>Zones</h3>
-          <%= for zone <- @zones do %>
-            <p>
-              <span><%= zone.name %></span>
-              <span><%= zone.sprinkler_zone %></span>
-            </p>
-          <% end %>
+          <ul>
+            <%= for zone <- @zones do %>
+              <li class="flex justify-between">
+                <div><%= zone.name %></div>
+                <div>Sprinkler <%= zone.sprinkler_zone %></div>
+              </li>
+            <% end %>
+          </ul>
         </.modal_form>
       </form>
     </.modal_wrapper>
@@ -56,7 +70,7 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
 
   @impl true
   def handle_event("create_schedule", _params, socket) do
-    schedule = %Schedule{name: "New Schedule", edit: true}
+    schedule = %Schedule{id: Ecto.UUID.generate(), name: "New Schedule", edit: true}
 
     { :noreply,
        assign(socket, %{schedules: socket.assigns.schedules ++ [schedule]})
@@ -65,8 +79,17 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
 
   @impl true
   def handle_event("edit_schedule", params, socket) do
+    updated_list =
+      socket.assigns.schedules
+      |> Enum.map(fn schedule ->
+          Map.put(schedule, :edit, schedule.id == params["id"])
+        end)
+      |> Enum.filter(fn schedule -> schedule.id != nil end)
 
-    {:noreply, socket}
+    {
+      :noreply,
+      assign(socket, %{schedules: updated_list})
+    }
   end
 
   @impl true
@@ -74,7 +97,7 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
     schedules =
       socket.assigns.schedules
       |> Enum.map(fn schedule ->
-        if schedule.id == params["id"] |> String.to_integer do
+        if schedule.id == params["id"] do
           schedule
           |> convert_params(params)
           |> Map.merge(%{edit: false})
@@ -82,11 +105,11 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
           schedule
         end
       end)
+      |> IO.inspect(label: "schedules")
 
     PersistenceAdapter.new(%{set_name: "schedules", configs: schedules})
     |> PersistenceAdapter.local_write
     |> PersistenceAdapter.save
-
 
     {:noreply, assign(socket, %{schedules: schedules})}
   end
@@ -108,6 +131,7 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
   def convert_params(schedule, params) do
     Schedule.changeset(schedule, params)
     |> apply_changes
+    |> IO.inspect(label: "schedule - changes applied")
   end
 
   @spec zone_name(integer(), list(Zone)) :: String.t()

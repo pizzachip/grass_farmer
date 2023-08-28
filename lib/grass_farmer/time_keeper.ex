@@ -25,7 +25,7 @@ defmodule GrassFarmer.TimeKeeper do
   def handle_cast(:get_time, state) do
     Process.sleep(@delay)
     time = NaiveDateTime.local_now()
-    PubSub.broadcast(GrassFarmer.PubSub, "time_keeper", {:update_time, time})
+    PubSub.broadcast(GrassFarmer.PubSub, "assigns", {:update_time, time})
     GenServer.cast(__MODULE__, :get_time)
     {:noreply, state}
   end

@@ -11,12 +11,12 @@ defmodule GrassFarmer.Schedule do
     field :days, {:array, :integer}, default: [1,3,5,7]
     field :edit, :boolean, default: false
     field :status, Ecto.Enum, values: [:on, :off], default: :off
-    field :sprinkler_zones, {:array, :integer}, default: []
+    field :zones, {:array, Ecto.UUID}, default: []
   end
 
   def changeset(schedule, params \\ %{}) do
     schedule
-    |> cast(params, [:name, :start_time, :sprinkler_zones, :days, :edit, :status])
-    |> validate_required([:name, :start_time, :sprinkler_zones, :days])
+    |> cast(params, [:name, :start_time, :zones, :days, :edit, :status])
+    |> validate_required([:name, :start_time, :zones, :days])
   end
 end

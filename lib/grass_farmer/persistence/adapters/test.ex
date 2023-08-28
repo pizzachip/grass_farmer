@@ -21,7 +21,7 @@ defmodule GrassFarmer.PersistenceAdapter.Test do
 
     def local_read(adapter) do
       case adapter.set_name do
-        "zones"     -> [%Zone{id: 1}]
+        "zones"     -> [%Zone{id: Ecto.UUID.generate()}]
         "schedules" -> [%Schedule{id: 1, name: "Schedule 1"}, %Schedule{id: 2, name: "Schedule 2"}]
         _           -> []
       end

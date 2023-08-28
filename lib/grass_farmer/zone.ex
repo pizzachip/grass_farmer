@@ -1,6 +1,6 @@
 defmodule GrassFarmer.Zone do
   use Ecto.Schema
-  @primary_key {:id, :binary_id, [ autogenerate: false, default: Ecto.UUID.generate ]}
+  @primary_key {:id, Ecto.UUID, autogenerate: false}
   import Ecto.Changeset
 
   embedded_schema do

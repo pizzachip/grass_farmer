@@ -4,7 +4,7 @@ defmodule GrassFarmerWeb.Home do
   alias GrassFarmerWeb.Components.{Schedule,
     ScheduleManager,
     Weather,
-    Zones,
+    ZoneManager,
     Footer,
     StyleBlocks}
   alias GrassFarmer.Loader
@@ -12,7 +12,7 @@ defmodule GrassFarmerWeb.Home do
 
   @impl true
   def mount(_params, _session, socket) do
-    PubSub.subscribe(GrassFarmer.PubSub, "time_keeper")
+    PubSub.subscribe(GrassFarmer.PubSub, "assigns")
 
     new_socket =
       assign(socket,
@@ -34,7 +34,7 @@ defmodule GrassFarmerWeb.Home do
           <Schedule.quickview />
           <Weather.quickview />
           <.live_component module={ScheduleManager} id="schedules" zones={@zones} schedules={@schedules} />
-          <.live_component module={Zones} id="zones" zones={@zones} />
+          <.live_component module={ZoneManager} id="zones" zones={@zones} />
         </div>
         <div>
           <.live_component module={Footer}  id="footer" zones={@zones} schedules={@schedules} />
@@ -44,11 +44,16 @@ defmodule GrassFarmerWeb.Home do
     """
   end
 
-
   @impl true
   def handle_info({:update_time, time}, socket) do
     time_formatted = StyleBlocks.time_format(time, :just_time)
     {:noreply, assign(socket, %{time: time_formatted})}
+  end
+
+  @impl true
+  def handle_info({:update_zones, zones}, socket) do
+    IO.inspect(socket.assigns.zones, label: "handle_info zones")
+    {:noreply, assign(socket, %{zones: zones})}
   end
 
 end

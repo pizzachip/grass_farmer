@@ -52,7 +52,7 @@ defmodule GrassFarmerWeb.Components.StyleBlocks do
   attr :myself, :map, required: true
   def modal_form(assigns) do
     ~H"""
-    <div>
+    <div >
       <%= render_slot(@inner_block) %>
       <div class="flex flex-row items-center justify-between py-5 border-t border-gray-200" >
         <p class="font-semibold text-blue-600 cursor-pointer" phx-click="cancel_edit" phx-target={@myself} >Cancel</p>

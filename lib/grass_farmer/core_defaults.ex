@@ -8,8 +8,8 @@ defmodule GrassFarmer.CoreDefaults do
           location: "41.8781,-87.6298",
           weatherapi_key: ""
           },
-      "zones" => [%Zone{name: "Front Yard", sprinkler_zone: 1}],
-      "schedules" => [%Schedule{name: "Default Schedule"}],
+      "zones" => [%Zone{id: Ecto.UUID.generate(), name: "Front Yard", sprinkler_zone: 1}],
+      "schedules" => [%Schedule{id: Ecto.UUID.generate(), name: "Default Schedule"}],
       "watering_logs" => [],
       "rain" =>
         %{ today: 0,
