@@ -7,7 +7,7 @@ defmodule GrassFarmer.Schedule do
     field :name, :string, default: "name me"
     field :start_time, :time, default: ~T[07:00:00]
     field :days, {:array, :integer}, default: [1,3,5,7]
-    field :edit, :boolean, default: false
+    field :edit, Ecto.Enum, values: [:false, :edit, :delete], default: false
     field :status, Ecto.Enum, values: [:on, :off], default: :off
     field :zones, {:array, Ecto.UUID}, default: []
   end

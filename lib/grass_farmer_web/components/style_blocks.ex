@@ -29,20 +29,25 @@ defmodule GrassFarmerWeb.Components.StyleBlocks do
 
   slot :inner_block, required: true
   attr :myself, :map, required: true
-  attr :schedule, :map, required: true
+  attr :entity, :map, required: true
   attr :form_title, :string, required: true
-
+  attr :allow_delete, :string, required: true
   def modal_wrapper(assigns) do
     ~H"""
     <div class="flex justify-center h-screen w-screen top-0 left-0 fixed items-center bg-green-200/75 antialiased" phx-click="cancel_edit" phx-target={@myself}>
       <div class="flex flex-col w-11/12 sm:w-5/6 lg:w-1/2 max-w-2xl mx-auto rounded-lg border border-gray-300 shadow-xl" phx-click="" phx-target={@myself}>
         <div class="flex flex-row justify-between p-6 bg-white border-b border-gray-200 rounded-tl-lg rounded-tr-lg">
-          <p class="font-semibold text-gray-800"><%= @form_title %></p>
+          <div>
+            <span class="font-semibold text-gray-800 pr-5"><%= @form_title %></span>
+            <%= if @allow_delete == "yes" do %>
+              <span class="font-semibold text-red-400" phx-click="request_delete" phx-value-id={@entity.id} phx-target={@myself} >delete</span>
+            <% end %>
+          </div>
           <div phx-click="cancel_edit" phx-target={@myself} >
             <.close_x />
           </div>
         </div>
-        <div class="flex flex-col px-6 py-5 bg-gray-50">
+        <div class="flex flex-col px-6 bg-gray-50">
           <%= render_slot(@inner_block) %>
         </div>
       </div>
@@ -222,7 +227,10 @@ defmodule GrassFarmerWeb.Components.StyleBlocks do
   @spec time_format(NaiveDateTime, atom()) :: String.t()
   def time_format(date, format) do
     month = date.month |> month_string
-    time = date |> NaiveDateTime.to_time() |> Time.to_string() |> String.slice(0..4)
+    time = date
+      |> NaiveDateTime.to_time()
+      |> Time.to_string()
+      |> String.slice(0..4)
     year = date.year |> to_string
     day = date.day |> to_string
 
