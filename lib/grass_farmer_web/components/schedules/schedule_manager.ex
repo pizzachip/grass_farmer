@@ -4,7 +4,6 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
   alias GrassFarmer.{Schedule, Zone, PersistenceAdapter}
   import Ecto.Changeset
   import GrassFarmerWeb.Components.StyleBlocks
-  import Phoenix.HTML
 
   @impl true
   def render(assigns) do
@@ -32,13 +31,13 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
   def schedule_modal_form(assigns) do
     ~H"""
     <.modal_wrapper myself={@myself} schedule={@schedule}  form_title="Update Schedule" >
-      <form action="#" phx-submit="submit_schedule" phx-target={@myself}>
+      <form action="#" phx-submit="submit_schedule" phx-change="temp_update" phx-target={@myself}>
         <.modal_form myself={@myself}>
           <div class="py-5">
             <div class="pb-5">
               <input type="hidden" name="id" value={@schedule.id} />
               <label class="pr-5">Name</label><input type="text" name="name" value={@schedule.name} />
-              </div>
+            </div>
             <label class="pr-5">Start Time</label>
 
             <select name="start_hour" >
@@ -52,7 +51,7 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
             </select>
 
             <select name="start_minute">
-              <%= for minute <- 0..12 do %>
+              <%= for minute <- 0..11 do %>
                 <%= if minute * 5 == @schedule.start_time.minute do %>
                   <option value={minute * 5} selected ><%= minute * 5 %></option>
                 <% else %>
@@ -68,7 +67,7 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
           </div>
           <ul>
             <%= for zone <- @zones do %>
-              <li class={zone_in_schedule_format(zone, @schedule.zones) <> " flex justify-between p-3"} phx-click="activate_zone" phx-value-zone={zone.id} phx-value-schedule={@schedule.id} phx-target={@myself} >
+              <li class={zone_in_schedule_format(zone, @schedule.zones) <> " flex justify-between p-3"} phx-click="toggle_zone" phx-value-zone={zone.id} phx-value-schedule={@schedule.id} phx-target={@myself} >
                 <div><%= zone.name %></div>
                 <div>Sprinkler <%= zone.sprinkler_zone %></div>
               </li>
@@ -85,8 +84,7 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
     schedule = %Schedule{id: Ecto.UUID.generate(), name: "New Schedule", edit: true}
 
     { :noreply,
-       assign(socket, %{schedules: socket.assigns.schedules ++ [schedule]})
-    }
+       assign(socket, %{schedules: socket.assigns.schedules ++ [schedule]})}
   end
 
   @impl true
@@ -123,24 +121,13 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
   end
 
   @impl true
-  def handle_event("cancel_edit", _params, socket) do
-    updated_list =
-      socket.assigns.schedules
-      |> Enum.map(fn schedule -> Map.put(schedule, :edit, false) end)
-      |> Enum.filter(fn schedule -> schedule.id != nil end)
-
-    { :noreply,
-      assign(socket, %{schedules: updated_list}) }
-  end
-
-  @impl true
-  def handle_event("activate_zone", params, socket) do
+  def handle_event("temp_update", params, socket) do
     schedules =
       socket.assigns.schedules
       |> Enum.map(fn schedule ->
-        if schedule.id == params["schedule"] do
+        if schedule.id == params["id"] do
           schedule
-          |> activate_zone(%Zone{id: params["zone"]})
+          |> convert_params(params)
         else
           schedule
         end
@@ -149,13 +136,49 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
     {:noreply, assign(socket, %{schedules: schedules})}
   end
 
-  @spec activate_zone(%Schedule{}, %Zone{}) :: %Schedule{}
-  def activate_zone(schedule, zone) do
-    schedule
-    |> Map.update!(:zones, fn zones ->
-        zones ++ [zone.id]
-        |> Enum.uniq
+  @impl true
+  def handle_event("cancel_edit", _params, socket) do
+    saved_schedules =
+      PersistenceAdapter.new(%{set_name: "schedules", configs: nil})
+      |> PersistenceAdapter.local_read
+      |> Enum.map(fn schedule -> Map.put(schedule, :edit, false) end)
+      |> Enum.filter(fn schedule -> schedule.id != nil end)
+
+    { :noreply,
+      assign(socket, %{schedules: saved_schedules}) }
+  end
+
+  @impl true
+  def handle_event("toggle_zone", params, socket) do
+    IO.inspect(params, label: "toggle_zone params")
+    schedules =
+      socket.assigns.schedules
+      |> Enum.map(fn schedule ->
+        if schedule.id == params["schedule"] do
+          schedule
+          |> toggle_zone(%Zone{id: params["zone"]})
+        else
+          schedule
+        end
       end)
+
+    {:noreply, assign(socket, %{schedules: schedules})}
+  end
+
+  @spec toggle_zone(%Schedule{}, %Zone{}) :: %Schedule{}
+  def toggle_zone(schedule, zone) do
+    if Enum.member?(schedule.zones, zone.id) do
+      schedule
+      |> Map.update!(:zones, fn zones ->
+          Enum.filter(zones, fn z -> z != zone.id end)
+        end)
+    else
+      schedule
+      |> Map.update!(:zones, fn zones ->
+          zones ++ [zone.id]
+          |> Enum.uniq
+        end)
+    end
   end
 
   def write_schedules(schedules) do

@@ -217,7 +217,6 @@ defmodule GrassFarmerWeb.Components.StyleBlocks do
       -12 -> true
       _ -> false
     end
-    |> IO.inspect(label: "hour_match")
   end
 
   @spec time_format(NaiveDateTime, atom()) :: String.t()
