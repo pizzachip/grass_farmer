@@ -1,8 +1,6 @@
 defmodule GrassFarmer.Schedule do
   use Ecto.Schema
   @primary_key {:id, :binary_id, [ autogenerate: false, default: Ecto.UUID.generate ]}
-
-  alias GrassFarmer.Zone
   import Ecto.Changeset
 
   embedded_schema do

@@ -1,6 +1,8 @@
 defmodule GrassFarmerWeb.Components.StyleBlocks do
   use Phoenix.Component
 
+  import Phoenix.HTML
+
   slot :inner_block, required: true
   def tile_row_wrapper(assigns) do
     ~H"""
@@ -205,6 +207,17 @@ defmodule GrassFarmerWeb.Components.StyleBlocks do
       "on" -> "bg-white"
       _ -> "bg-yellow-500"
     end
+  end
+
+  @spec hour_match(integer(), integer()) :: boolean()
+  def hour_match(hour, comp_hour) do
+    case hour - comp_hour do
+      0 -> true
+      12 -> true
+      -12 -> true
+      _ -> false
+    end
+    |> IO.inspect(label: "hour_match")
   end
 
   @spec time_format(NaiveDateTime, atom()) :: String.t()
