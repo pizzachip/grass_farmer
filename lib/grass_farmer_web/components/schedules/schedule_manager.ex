@@ -89,8 +89,13 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
             </select>
 
             <select name="start_am_pm">
+              <%= if @schedule.start_time.hour > 12 do %>
                 <option value="AM" >AM</option>
+                <option value="PM" selected >PM</option>
+              <% else %>
+                <option value="AM" selected >AM</option>
                 <option value="PM" >PM</option>
+              <% end %>
             </select>
           </div>
           <ul>
@@ -130,9 +135,10 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
   end
 
   @impl true
-  def handle_event("submit_schedule", _params, socket) do
+  def handle_event("submit_schedule", params, socket) do
     schedules =
       socket.assigns.schedules
+      |> IO.inspect(label: "schedules submit")
       |> Enum.map(fn schedule -> Map.merge(schedule, %{edit: false}) end)
 
     write_schedules(schedules)
@@ -152,6 +158,7 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
           schedule
         end
       end)
+      |> IO.inspect(label: "schedules")
 
     {:noreply, assign(socket, %{schedules: schedules})}
   end
@@ -234,6 +241,7 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
 
   @spec convert_params(%Schedule{}, map()) :: %Schedule{}
   def convert_params(schedule, params) do
+    IO.inspect(params, label: "params")
     add_12 =
       if params["start_am_pm"] == "PM" do
         1
