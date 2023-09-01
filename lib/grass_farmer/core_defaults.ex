@@ -1,5 +1,5 @@
 defmodule GrassFarmer.CoreDefaults do
-  alias GrassFarmer.Zone
+  alias GrassFarmer.{ Zone, Schedule }
 
   def values() do
     %{
@@ -8,17 +8,9 @@ defmodule GrassFarmer.CoreDefaults do
           location: "41.8781,-87.6298",
           weatherapi_key: ""
           },
-      "zones" => [%Zone{id: 1,
-        name: "Edit to name me",
-        status: "off"}],
-      "schedules" =>
-        [%{id: 1,
-           name: "Default Schedule",
-           days: "1357",
-           start_time: "07:00",
-           duration_mins: [%{zone_id: 1, duration: "10"}]
-        }],
-      "watering_logs" => [], # format | [%{"zone_id" => 1, "start_time" => "", "end_time" => ""}]
+      "zones" => [%Zone{id: Ecto.UUID.generate(), name: "Front Yard", sprinkler_zone: 1}],
+      "schedules" => [%Schedule{id: Ecto.UUID.generate(), name: "Default Schedule"}],
+      "watering_logs" => [],
       "rain" =>
         %{ today: 0,
            last_rain: nil,

@@ -17,6 +17,7 @@ defmodule GrassFarmer.PersistenceAdapter.Prod do
   defimpl Persist, for: Prod do
     def local_write(adapter) do
       PropertyTable.put(SettingsTable, [adapter.set_name], adapter.configs)
+      adapter
     end
 
     def local_read(adapter) do

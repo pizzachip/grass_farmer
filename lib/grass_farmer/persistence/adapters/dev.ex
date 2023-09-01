@@ -17,13 +17,13 @@ defmodule GrassFarmer.PersistenceAdapter.Dev do
   defimpl Persist, for: Dev do
     def local_write(adapter) do
       PropertyTable.put(SettingsTable, [adapter.set_name], adapter.configs)
+      adapter
     end
 
     def local_read(adapter) do
       PropertyTable.get(SettingsTable, [adapter.set_name])
     end
 
-    # Should not need in Dev
     def save(adapter) do
       case adapter.configs do
         nil -> :error
@@ -31,7 +31,6 @@ defmodule GrassFarmer.PersistenceAdapter.Dev do
       end
     end
 
-    # Should not need in Dev
     def load(adapter) do
       adapter.configs
     end

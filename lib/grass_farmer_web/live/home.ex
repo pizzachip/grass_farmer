@@ -1,18 +1,24 @@
 defmodule GrassFarmerWeb.Home do
   use GrassFarmerWeb, :live_view
 
-  alias GrassFarmerWeb.Components.{Schedule, Weather, Zones, Footer, StyleBlocks}
+  alias GrassFarmerWeb.Components.{Schedule,
+    ScheduleManager,
+    Weather,
+    ZoneManager,
+    Footer,
+    StyleBlocks}
   alias GrassFarmer.Loader
   alias Phoenix.PubSub
 
   @impl true
   def mount(_params, _session, socket) do
-    Loader.load()
-    PubSub.subscribe(GrassFarmer.PubSub, "time_keeper")
+    PubSub.subscribe(GrassFarmer.PubSub, "assigns")
 
     new_socket =
       assign(socket,
-        Loader.translate() |> Map.merge(%{time: NaiveDateTime.local_now()})
+        Loader.translate()
+        |> Map.merge(
+          %{time: NaiveDateTime.local_now()})
       )
 
     {:ok, new_socket}
@@ -27,22 +33,27 @@ defmodule GrassFarmerWeb.Home do
         <div>
           <Schedule.quickview />
           <Weather.quickview />
-          <Schedule.list schedules={@schedules}/>
-          <.live_component module={Zones} id="zones" zones={@zones} />
+          <.live_component module={ScheduleManager} id="schedules" zones={@zones} schedules={@schedules} />
+          <.live_component module={ZoneManager} id="zones" zones={@zones} />
         </div>
         <div>
-          <.live_component module={Footer}  id="footer" zones={@zones} />
+          <.live_component module={Footer}  id="footer" zones={@zones} schedules={@schedules} />
         </div>
       </div>
     </.body>
     """
   end
 
-
   @impl true
   def handle_info({:update_time, time}, socket) do
     time_formatted = StyleBlocks.time_format(time, :just_time)
     {:noreply, assign(socket, %{time: time_formatted})}
+  end
+
+  @impl true
+  def handle_info({:update_zones, zones}, socket) do
+    IO.inspect(socket.assigns.zones, label: "handle_info zones")
+    {:noreply, assign(socket, %{zones: zones})}
   end
 
 end
