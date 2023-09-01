@@ -14,9 +14,7 @@ defmodule GrassFarmer.Application do
         # Start the PubSub system
         {Phoenix.PubSub, name: GrassFarmer.PubSub},
         # Start the Endpoint (http/https)
-        GrassFarmerWeb.Endpoint,
-        {PropertyTable, name: SettingsTable},
-        GrassFarmer.TimeKeeper
+        GrassFarmerWeb.Endpoint
       ] ++ children(target())
 
     # See https://hexdocs.pm/elixir/Supervisor.html
@@ -28,6 +26,8 @@ defmodule GrassFarmer.Application do
   # List all child processes to be supervised
   def children(:host) do
     [
+      {PropertyTable, name: SettingsTable},
+      GrassFarmer.TimeKeeper
       # Children that only run on the host
       # Starts a worker by calling: GrassFarmer.Worker.start_link(arg)
       # {GrassFarmer.Worker, arg},
@@ -39,7 +39,8 @@ defmodule GrassFarmer.Application do
       # Children for all targets except host
       # Starts a worker by calling: GrassFarmer.Worker.start_link(arg)
       # {GrassFarmer.Worker, arg},
-      {PropertyTable, name: SettingsTable, persist_data_path: "/data"}
+      {PropertyTable, name: SettingsTable, persist_data_path: "/data"},
+      GrassFarmer.TimeKeeper
     ]
   end
 
