@@ -1,7 +1,7 @@
 defmodule GrassFarmerWeb.Components.ScheduleManager do
   use Phoenix.LiveComponent
 
-  alias GrassFarmer.{Schedule, Zone, PersistenceAdapter}
+  alias GrassFarmer.{Schedule, Zone, PersistenceAdapter, ScheduleZone}
   import Ecto.Changeset
   import GrassFarmerWeb.Components.StyleBlocks
   import GrassFarmerWeb.CoreComponents
@@ -78,15 +78,18 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
               <% end %>
             </select>
 
+            <span class="text-2xl font-bold">:</span>
+
             <select name="start_minute">
               <%= for minute <- 0..11 do %>
                 <%= if minute * 5 == @schedule.start_time.minute do %>
-                  <option value={minute * 5} selected ><%= minute * 5 %></option>
+                  <option value={minute * 5} selected label={two_digit(minute * 5)} />
                 <% else %>
-                  <option value={minute * 5} ><%= minute * 5 %></option>
+                  <option value={minute * 5} label={two_digit(minute * 5)} />
                 <% end %>
               <% end %>
             </select>
+            <span class="text-2xl font-bold">:</span>
 
             <select name="start_am_pm">
               <%= if @schedule.start_time.hour > 12 do %>
@@ -99,10 +102,16 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
             </select>
           </div>
           <ul>
+            <li class="flex justify-between p-3">
+              <div>Zone Name</div>
+              <div>Duration</div>
+              <div>Valve Number</div>
+            </li>
             <%= for zone <- @zones do %>
               <li class={zone_in_schedule_format(zone, @schedule.zones) <> " flex justify-between p-3"} phx-click="toggle_zone" phx-value-zone={zone.id} phx-value-schedule={@schedule.id} phx-target={@myself} >
                 <div><%= zone.name %></div>
-                <div>Sprinkler <%= zone.sprinkler_zone %></div>
+                <div><%= duration(zone, @schedule.zones) %></div>
+                <div><%= zone.sprinkler_zone %></div>
               </li>
             <% end %>
           </ul>
@@ -135,7 +144,7 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
   end
 
   @impl true
-  def handle_event("submit_schedule", params, socket) do
+  def handle_event("submit_schedule", _params, socket) do
     schedules =
       socket.assigns.schedules
       |> IO.inspect(label: "schedules submit")
@@ -176,19 +185,21 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
   end
 
   @impl true
-  def handle_event("toggle_zone", params, socket) do
-    schedules =
-      socket.assigns.schedules
-      |> Enum.map(fn schedule ->
-        if schedule.id == params["schedule"] do
-          schedule
-          |> toggle_zone(%Zone{id: params["zone"]})
-        else
-          schedule
-        end
-      end)
+  def handle_event("toggle_zone", %{"schedule" => schedule_id, "zone" => zone_id}, socket) do
+    IO.inspect(zone_id, label: "zone_id")
+    IO.inspect(schedule_id, label: "schedule_id")
 
-    {:noreply, assign(socket, %{schedules: schedules})}
+    my_schedule = Enum.find(socket.assigns.schedules, fn schedule -> schedule.id == schedule_id end)
+alias GrassFarmer.ScheduleZone
+    my_zone = %ScheduleZone{zone_id: zone_id, duration: 10}
+    remove = Enum.filter(my_schedule.zones, fn zone -> zone.zone_id != zone_id end)
+    new_zones = remove ++ [my_zone]
+    new_schedule = Map.put(my_schedule, :zones, new_zones)
+    new_schedules = Enum.map(socket.assigns.schedules, fn schedule -> if schedule.id == schedule_id, do: new_schedule, else: schedule end)
+    |> IO.inspect(label: "new_schedules")
+
+
+    {:noreply, assign(socket, %{schedules: new_schedules})}
   end
 
   @impl true
@@ -202,7 +213,6 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
           schedule
         end
       end)
-
     {:noreply, assign(socket, %{schedules: schedules})}
   end
 
@@ -217,9 +227,24 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
     {:noreply, assign(socket, %{schedules: schedules})}
   end
 
-  @spec toggle_zone(%Schedule{}, %Zone{}) :: %Schedule{}
+  @spec duration(%Zone{}, [%ScheduleZone{}]) :: Integer
+  defp duration(zone, schedule_zones) do
+    case schedule_zones do
+      [] -> 0
+      [nil] -> 0
+      zones ->
+        zones_found = Enum.find(zones, fn z -> z.zone_id == zone.id end)
+        if zones_found == nil do
+          0
+        else
+          Map.get(zones_found, :duration, 10)
+        end
+    end
+  end
+
+  @spec toggle_zone(%Schedule{}, %ScheduleZone{}) :: %Schedule{}
   def toggle_zone(schedule, zone) do
-    if Enum.member?(schedule.zones, zone.id) do
+    if Enum.member?(schedule.zones |> Enum.map(&{&1.zone_id}), zone.zone_id) do
       schedule
       |> Map.update!(:zones, fn zones ->
           Enum.filter(zones, fn z -> z != zone.id end)

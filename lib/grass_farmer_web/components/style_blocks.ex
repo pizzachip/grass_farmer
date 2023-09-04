@@ -224,6 +224,13 @@ defmodule GrassFarmerWeb.Components.StyleBlocks do
     end
   end
 
+  @spec two_digit(integer()) :: String.t()
+  def two_digit(num) do
+    num
+    |> to_string
+    |> String.pad_leading(2, "0")
+  end
+
   @spec time_format(NaiveDateTime, atom()) :: String.t()
   def time_format(date, format) do
     month = date.month |> month_string
