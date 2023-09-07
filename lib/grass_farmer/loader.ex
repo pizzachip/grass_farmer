@@ -3,13 +3,16 @@ defmodule GrassFarmer.Loader do
 
   @spec load() :: :ok
   def load() do
-    for set <- set_names() do
-      PersistenceAdapter.new(%{set_name: set, configs: nil})
-      |> exists_in_mem?
-      |> load_from_persistence_if_needed
-      |> load_core_defaults_if_needed
-    end
+    # Load data into SettingsTable (PropertyTable) in memory
+    set_names()
+    |> Enum.each(fn set ->
+         PersistenceAdapter.new(%{set_name: set, configs: nil})
+         |> exists_in_mem?
+         |> load_from_persistence_if_needed
+         |> load_core_defaults_if_needed
+       end )
 
+    #Save SettingsTable to device persistent memory files
     PersistenceAdapter.new(%{set_name: nil, configs: nil})
     |> PersistenceAdapter.save
   end
