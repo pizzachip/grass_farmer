@@ -18,7 +18,9 @@ defmodule GrassFarmerWeb.Home do
       assign(socket,
         Loader.translate()
         |> Map.merge(
-          %{time: NaiveDateTime.local_now()})
+          %{time: NaiveDateTime.local_now(),
+            edit_zone: ""
+          })
       )
 
     {:ok, new_socket}
@@ -34,7 +36,7 @@ defmodule GrassFarmerWeb.Home do
           <Schedule.quickview />
           <Weather.quickview />
           <.live_component module={ScheduleManager} id="schedules" zones={@zones} schedules={@schedules} />
-          <.live_component module={ZoneManager} id="zones" zones={@zones} />
+          <.live_component module={ZoneManager} id="zones" zones={@zones} edit_zone={@edit_zone} />
         </div>
         <div>
           <.live_component module={Footer}  id="footer" zones={@zones} schedules={@schedules} />
@@ -42,6 +44,16 @@ defmodule GrassFarmerWeb.Home do
       </div>
     </.body>
     """
+  end
+
+  @impl true
+  def handle_event("manage_zones", %{"action" => "create"}, socket) do
+      {:noreply, assign(socket, %{zones: ZoneManager.create_zone(socket.assigns.zones)})}
+  end
+
+  @impl true
+  def handle_event("manage_zones", %{"action" => "delete", "zone_id" => zone_id}, socket) do
+      {:noreply, assign(socket, %{zones: ZoneManager.delete_zone(socket.assigns.zones, zone_id)})}
   end
 
   @impl true

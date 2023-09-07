@@ -15,11 +15,11 @@ defmodule GrassFarmerWeb.Components.ZoneManager do
           <div class="text-xl font-bold text-gray-600 mb-2">Watering Zones</div>
         </div>
         <%= for zone <- @zones do %>
-          <.zone_card zone={zone} myself={@myself} />
+          <.zone_card zone={zone} edit_zone={@edit_zone} myself={@myself} />
         <% end %>
       </div>
       <div class="flex justify-end">
-        <button class="rounded-full text-2xl font-bold bg-green-200 px-3 py-1" phx-click="create_zone" phx-target={@myself}>
+        <button class="rounded-full text-2xl font-bold bg-green-200 px-3 py-1" phx-click="manage_zones" phx-value-action="create" >
           +
         </button>
       </div>
@@ -28,12 +28,13 @@ defmodule GrassFarmerWeb.Components.ZoneManager do
   end
 
   attr :zone, :map, required: true
+  attr :edit_zone, :string, required: true
   attr :myself, :map, required: true
   def zone_card(assigns) do
     ~H"""
     <div class="each flex hover:shadow-lg select-none p-2 rounded-md border-gray-300 border mb-1 hover:border-gray-500 cursor-pointer">
       <div class="left">
-        <%= if @zone.edit == true do %>
+        <%= if @zone.id == @edit_zone do %>
           <form action="#" phx-submit="update_zone" phx-target={@myself}>
             <input type="hidden" name="id" value={@zone.id} />
             <input type="text" name="zone_name" value={@zone.name} />
@@ -51,7 +52,7 @@ defmodule GrassFarmerWeb.Components.ZoneManager do
           <.edit_pencil />
         </div>
 
-        <div phx-click="delete_zone" phx-value-zone={@zone.id} phx-target={@myself} >
+        <div phx-click="manage_zones" phx-value-action="delete" phx-value-zone_id={@zone.id}  >
           <.delete />
         </div>
       </div>
@@ -60,19 +61,19 @@ defmodule GrassFarmerWeb.Components.ZoneManager do
     """
   end
 
-  @impl true
-  def handle_event("create_zone", _params, socket) do
+  @spec create_zone([Zone]) :: [Zone]
+  def create_zone(zones) do
     next_sprinkler_zone =
-      socket.assigns.zones
+      zones
       |> Enum.reduce(0, fn zone, acc -> max(zone.sprinkler_zone, acc) end)
 
-    zones = socket.assigns.zones ++ [%Zone{id: Ecto.UUID.generate(), sprinkler_zone: next_sprinkler_zone + 1, edit: true}]
+    new_zones = zones ++ [%Zone{id: Ecto.UUID.generate(), sprinkler_zone: next_sprinkler_zone + 1, edit: true}]
 
-    PersistenceAdapter.new(%{set_name: "zones", configs: zones})
+    PersistenceAdapter.new(%{set_name: "zones", configs: new_zones})
     |> PersistenceAdapter.local_write
     |> PersistenceAdapter.save
 
-    {:noreply, assign(socket, %{zones: zones})}
+    new_zones
   end
 
   @impl true
@@ -87,20 +88,12 @@ defmodule GrassFarmerWeb.Components.ZoneManager do
 
     PubSub.broadcast(GrassFarmer.PubSub, "assigns", {:update_zones, new_zones})
 
-    {:noreply, assign(socket, %{zones: new_zones})}
+    {:noreply, assign(socket, %{zones: new_zones, edit_zone: ""})}
   end
 
   @impl true
   def handle_event("edit_zone", %{"zone" => zone_id}, socket) do
-    new_zones =
-      socket.assigns.zones
-      |> Enum.map(fn zone -> if zone.id == zone_id, do: %{zone | edit: true}, else: zone end)
-
-    PersistenceAdapter.new(%{set_name: "zones", configs: new_zones})
-    |> PersistenceAdapter.local_write
-
-    {:noreply,
-     assign(socket, %{zones: new_zones})}
+    {:noreply, assign(socket, %{edit_zone: zone_id})}
   end
 
   @impl true
@@ -116,6 +109,19 @@ defmodule GrassFarmerWeb.Components.ZoneManager do
     PubSub.broadcast(GrassFarmer.PubSub, "assigns", {:update_zones, new_zones})
 
     {:noreply, assign(socket, %{zones: new_zones})}
+  end
+
+  @spec delete_zone([Zone], String.t()) :: [Zone]
+  def delete_zone(zones, zone_id) do
+    new_zones =
+      zones
+      |> Enum.filter(fn zone -> zone.id != zone_id end)
+
+    PersistenceAdapter.new(%{set_name: "zones", configs: new_zones})
+    |> PersistenceAdapter.local_write
+    |> PersistenceAdapter.save
+
+    new_zones
   end
 
 end
