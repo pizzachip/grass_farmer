@@ -3,7 +3,8 @@ defmodule GrassFarmerWeb.Components.ZoneManager do
 
   import GrassFarmerWeb.Components.StyleBlocks
 
-  alias GrassFarmer.{ Zone, PersistenceAdapter }
+  alias GrassFarmer.PersistenceAdapter
+  alias GrassFarmer.Zones.Zone
   alias Phoenix.PubSub
 
   @impl true
@@ -35,7 +36,8 @@ defmodule GrassFarmerWeb.Components.ZoneManager do
     <div class="each flex hover:shadow-lg select-none p-2 rounded-md border-gray-300 border mb-1 hover:border-gray-500 cursor-pointer">
       <div class="left">
         <%= if @zone.id == @edit_zone do %>
-          <form action="#" phx-submit="update_zone" phx-target={@myself}>
+          <form action="#" phx-submit="manage_zones" >
+            <input type="hidden" name="action" value="update" />
             <input type="hidden" name="id" value={@zone.id} />
             <input type="text" name="zone_name" value={@zone.name} />
             <input type="text" name="sprinkler_zone" placeholder={@zone.sprinkler_zone} value={@zone.sprinkler_zone} class="w-12 text-center"/>
@@ -61,21 +63,6 @@ defmodule GrassFarmerWeb.Components.ZoneManager do
     """
   end
 
-  @spec create_zone([Zone]) :: [Zone]
-  def create_zone(zones) do
-    next_sprinkler_zone =
-      zones
-      |> Enum.reduce(0, fn zone, acc -> max(zone.sprinkler_zone, acc) end)
-
-    new_zones = zones ++ [%Zone{id: Ecto.UUID.generate(), sprinkler_zone: next_sprinkler_zone + 1, edit: true}]
-
-    PersistenceAdapter.new(%{set_name: "zones", configs: new_zones})
-    |> PersistenceAdapter.local_write
-    |> PersistenceAdapter.save
-
-    new_zones
-  end
-
   @impl true
   def handle_event("update_zone", params, socket) do
     new_zones =
@@ -96,32 +83,17 @@ defmodule GrassFarmerWeb.Components.ZoneManager do
     {:noreply, assign(socket, %{edit_zone: zone_id})}
   end
 
-  @impl true
-  def handle_event("delete_zone", %{"zone" => zone_id}, socket) do
-    new_zones =
-      socket.assigns.zones
-      |> Enum.filter(fn zone -> zone.id != zone_id end)
-
-    PersistenceAdapter.new(%{set_name: "zones", configs: new_zones})
-    |> PersistenceAdapter.local_write
-    |> PersistenceAdapter.save
-
-    PubSub.broadcast(GrassFarmer.PubSub, "assigns", {:update_zones, new_zones})
-
-    {:noreply, assign(socket, %{zones: new_zones})}
-  end
-
-  @spec delete_zone([Zone], String.t()) :: [Zone]
-  def delete_zone(zones, zone_id) do
+  @spec update_zone([Zone], String.t()) :: [Zone]
+  def update_zone(zones, {zone_id, zone_name, sprinkler_zone}) do
     new_zones =
       zones
-      |> Enum.filter(fn zone -> zone.id != zone_id end)
+      |> Enum.map(fn zone -> 
+        if zone.id == zone_id, do: %Zone{zone | name: zone_name, sprinkler_zone: sprinkler_zone},  else: zone end)
 
     PersistenceAdapter.new(%{set_name: "zones", configs: new_zones})
-    |> PersistenceAdapter.local_write
-    |> PersistenceAdapter.save
+     |> PersistenceAdapter.local_write
+     |> PersistenceAdapter.save
 
     new_zones
   end
-
 end

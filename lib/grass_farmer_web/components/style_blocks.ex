@@ -1,8 +1,6 @@
 defmodule GrassFarmerWeb.Components.StyleBlocks do
   use Phoenix.Component
 
-  import Phoenix.HTML
-
   slot :inner_block, required: true
   def tile_row_wrapper(assigns) do
     ~H"""

@@ -1,10 +1,15 @@
 defmodule GrassFarmerWeb.Components.ScheduleManager do
   use Phoenix.LiveComponent
 
-  alias GrassFarmer.{Schedule, Zone, PersistenceAdapter, ScheduleZone}
-  import Ecto.Changeset
+  alias GrassFarmer.{Schedule, PersistenceAdapter, ScheduleZone}
+  alias GrassFarmer.Zones.Zone
   import GrassFarmerWeb.Components.StyleBlocks
   import GrassFarmerWeb.CoreComponents
+
+  @impl true
+  def mount(socket) do
+    {:ok, assign(socket, %{edit_schedule: "", delete_schedule: ""})}
+  end
 
   @impl true
   def render(assigns) do
@@ -18,10 +23,10 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
         <div class="flex items-start">
           <%= for schedule <- @schedules do %>
             <div class="py-1 px-2 mr-2 rounded-md bg-green-100 hover:bg-yellow-100" phx-click="edit_schedule" phx-value-id={schedule.id} phx-target={@myself} ><%= schedule.name %></div>
-            <%= if schedule.edit == :edit do %>
+            <%= if @edit_schedule == {schedule.id}  do %>
               <.schedule_modal_form myself={@myself} schedule={schedule} zones={@zones}/>
             <% end %>
-            <%= if schedule.edit == :delete do %>
+            <%= if @delete_schedule == {schedule.id} do %>
               <.confirm_delete_modal myself={@myself} schedule={schedule} />
             <% end %>
           <% end %>
@@ -123,10 +128,10 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
 
   @impl true
   def handle_event("create_schedule", _params, socket) do
-    schedule = %Schedule{id: Ecto.UUID.generate(), name: "New Schedule", edit: :edit}
+    schedule = %Schedule{id: Ecto.UUID.generate(), name: "New Schedule"}
 
     { :noreply,
-       assign(socket, %{schedules: socket.assigns.schedules ++ [schedule]})}
+       assign(socket, %{schedules: socket.assigns.schedules ++ [schedule], edit_schedule: schedule.id})}
   end
 
   @impl true
@@ -278,8 +283,7 @@ alias GrassFarmer.ScheduleZone
 
     time = Time.new!(hours, String.to_integer(params["start_minute"]), 0)
 
-    Schedule.changeset(schedule, params |> Map.put("start_time", time))
-    |> apply_changes
+    Map.merge(schedule, %{"start_time" => time})
   end
 
   @spec zone_in_schedule_format(%Zone{}, [:uuid]) :: String.t()

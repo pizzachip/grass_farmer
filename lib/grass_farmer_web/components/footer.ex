@@ -19,13 +19,15 @@ defmodule GrassFarmerWeb.Components.Footer do
     """
   end
 
-  defp watering_status(schedules) do
-    running_schedules = Enum.filter(schedules, fn schedule -> schedule.status == "on" end)
+  defp watering_status(_schedules) do
+    # TODO refactor to grab status from genserver
+    # running_schedules = Enum.filter(schedules, fn schedule -> schedule.status == "on" end)
 
-    case Enum.count(running_schedules) do
-      0 -> "off"
-      _ -> "on"
-    end
+    # case Enum.count(running_schedules) do
+    #   0 -> "off"
+    #   _ -> "on"
+    # end
+    "on"
   end
 
   defp time_left(_schedules) do

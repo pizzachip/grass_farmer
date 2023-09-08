@@ -7,7 +7,8 @@ defmodule GrassFarmer.PersistenceAdapter.Test do
     can be any data type.
     This implies that data should be saved in 'sets' but can be lists, maps, etc.
   """
-  alias GrassFarmer.{ Persist, Zone, Schedule }
+  alias GrassFarmer.{ Persist, Schedule }
+  alias GrassFarmer.Zones.Zone
   alias GrassFarmer.PersistenceAdapter.Test
 
   def new(adapter) do
