@@ -136,16 +136,8 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
 
   @impl true
   def handle_event("edit_schedule", params, socket) do
-    updated_list =
-      socket.assigns.schedules
-      |> Enum.map(fn schedule ->
-          Map.put(schedule, :edit,
-            ( if schedule.id == params["id"], do: :edit, else: false) )
-        end)
-      |> Enum.filter(fn schedule -> schedule.id != nil end)
-
-    { :noreply,
-      assign(socket, %{schedules: updated_list}) }
+    IO.inspect(params, label: "params")
+    { :noreply, assign(socket, %{edit_schedule: params["id"] }) }
   end
 
   @impl true

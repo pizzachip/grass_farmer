@@ -15,7 +15,7 @@ end
 defmodule GrassFarmer.ScheduleZone do
 
   @type t :: %__MODULE__{
-    zone_id: String.t(),
+    zone_id: Ecto.UUID.t(),
     duration: integer()
   }
 
