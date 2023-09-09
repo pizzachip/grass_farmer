@@ -5,7 +5,6 @@ defmodule GrassFarmerWeb.Components.ZoneManager do
 
   alias GrassFarmer.PersistenceAdapter
   alias GrassFarmer.Zones.Zone
-  alias Phoenix.PubSub
 
   @impl true
   def render(assigns) do
@@ -61,21 +60,6 @@ defmodule GrassFarmerWeb.Components.ZoneManager do
 
     </div>
     """
-  end
-
-  @impl true
-  def handle_event("update_zone", params, socket) do
-    new_zones =
-      socket.assigns.zones
-      |> Enum.map(fn zone -> if zone.id == params["id"], do: %Zone{zone | name: params["zone_name"], edit: false}, else: zone end)
-
-    PersistenceAdapter.new(%{set_name: "zones", configs: new_zones})
-     |> PersistenceAdapter.local_write
-     |> PersistenceAdapter.save
-
-    PubSub.broadcast(GrassFarmer.PubSub, "assigns", {:update_zones, new_zones})
-
-    {:noreply, assign(socket, %{zones: new_zones, edit_zone: ""})}
   end
 
   @impl true

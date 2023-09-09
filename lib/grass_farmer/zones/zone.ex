@@ -1,31 +1,27 @@
 defmodule GrassFarmer.Zones.Zone do
-  use Ecto.Schema
-  @primary_key {:id, Ecto.UUID, autogenerate: false}
-  import Ecto.Changeset
   alias GrassFarmer.Zones.Zone
   alias GrassFarmer.PersistenceAdapter
 
-  embedded_schema do
-    field :sprinkler_zone, :integer
-    field :name, :string, default: "edit to name me"
-    field :edit, :boolean, default: false
-  end
+  
+  @type t :: %__MODULE__{
+    id: Ecto.UUID.t(),
+    name: String.t(),
+    sprinkler_zone: integer() 
+  }
 
-  def changeset(zone, params \\ %{}) do
-    zone
-    |> cast(params, [:name, :sprinkler_zone, :edit])
-    |> validate_required([:name, :sprinkler_zone, :edit])
-  end
+  defstruct [:id, :sprinkler_zone, :name]
 
-  @spec create_zone([Zone]) :: [Zone]
+  @spec create_zone([Zone.t()]) :: [Zone.t()]
   def create_zone(zones) do
     next_sprinkler_zone =
       zones
       |> Enum.reduce(0, fn zone, acc -> max(zone.sprinkler_zone, acc) end)
+      |> IO.inspect(label: "next zone")
 
-    new_zones = zones ++ [%Zone{id: Ecto.UUID.generate(), sprinkler_zone: next_sprinkler_zone + 1, edit: true}]
+    new_zones = zones ++ 
+      [%Zone{id: Ecto.UUID.generate(), sprinkler_zone: (next_sprinkler_zone + 1), name: "Please name me"}]
 
-    local_write(%{set_name: "zones", configs: new_zones})
+    save(%{set_name: "zones", configs: new_zones})
 
     new_zones
   end
@@ -36,15 +32,26 @@ defmodule GrassFarmer.Zones.Zone do
       zones
       |> Enum.filter(fn zone -> zone.id != zone_id end)
 
-    local_write(%{set_name: "zones", configs: new_zones})
+    save(%{set_name: "zones", configs: new_zones})
 
     new_zones
   end
 
-  defp local_write(zone_updates) do
+  @spec update_zone([Zone], String.t()) :: [Zone]
+  def update_zone(zones, {zone_id, zone_name, sprinkler_zone}) do
+    new_zones =
+      zones
+      |> Enum.map(fn zone -> 
+        if zone.id == zone_id, do: %Zone{zone | name: zone_name, sprinkler_zone: sprinkler_zone},  else: zone end)
+
+    save(%{set_name: "zones", configs: new_zones})
+
+    new_zones
+  end
+
+  defp save(zone_updates) do
     PersistenceAdapter.new(zone_updates)
     |> PersistenceAdapter.local_write
     |> PersistenceAdapter.save
   end
-
 end

@@ -59,9 +59,8 @@ defmodule GrassFarmerWeb.Home do
     {:noreply,  
      assign(socket,  
        %{zones: ZoneManager.update_zone(socket.assigns.zones, {zone_id, name, sprinkler_zone }),
-       edit_zone: ""}
-     )
-   }
+       edit_zone: ""})
+    }
   end
 
   @impl true
