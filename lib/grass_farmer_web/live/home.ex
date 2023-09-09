@@ -58,7 +58,7 @@ defmodule GrassFarmerWeb.Home do
   def handle_event("manage_zones",  %{"action" => "update", "id"=> zone_id, "zone_name" => name, "sprinkler_zone" => sprinkler_zone }, socket) do
     {:noreply,  
      assign(socket,  
-       %{zones: ZoneManager.update_zone(socket.assigns.zones, {zone_id, name, sprinkler_zone }),
+       %{zones: Zone.update_zone(socket.assigns.zones, {zone_id, name, sprinkler_zone }),
        edit_zone: ""})
     }
   end

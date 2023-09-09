@@ -66,18 +66,4 @@ defmodule GrassFarmerWeb.Components.ZoneManager do
   def handle_event("edit_zone", %{"zone" => zone_id}, socket) do
     {:noreply, assign(socket, %{edit_zone: zone_id})}
   end
-
-  @spec update_zone([Zone], String.t()) :: [Zone]
-  def update_zone(zones, {zone_id, zone_name, sprinkler_zone}) do
-    new_zones =
-      zones
-      |> Enum.map(fn zone -> 
-        if zone.id == zone_id, do: %Zone{zone | name: zone_name, sprinkler_zone: sprinkler_zone},  else: zone end)
-
-    PersistenceAdapter.new(%{set_name: "zones", configs: new_zones})
-     |> PersistenceAdapter.local_write
-     |> PersistenceAdapter.save
-
-    new_zones
-  end
 end
