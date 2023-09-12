@@ -23,7 +23,7 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
         <div class="flex items-start">
           <%= for schedule <- @schedules do %>
             <div class="py-1 px-2 mr-2 rounded-md bg-green-100 hover:bg-yellow-100" phx-click="edit_schedule" phx-value-id={schedule.id} phx-target={@myself} ><%= schedule.name %></div>
-            <%= if @edit_schedule == {schedule.id}  do %>
+            <%= if @edit_schedule == schedule.id  do %>
               <.schedule_modal_form myself={@myself} schedule={schedule} zones={@zones}/>
             <% end %>
             <%= if @delete_schedule == {schedule.id} do %>
@@ -136,7 +136,6 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
 
   @impl true
   def handle_event("edit_schedule", params, socket) do
-    IO.inspect(params, label: "params")
     { :noreply, assign(socket, %{edit_schedule: params["id"] }) }
   end
 
@@ -278,8 +277,10 @@ alias GrassFarmer.ScheduleZone
     Map.merge(schedule, %{"start_time" => time})
   end
 
-  @spec zone_in_schedule_format(%Zone{}, [:uuid]) :: String.t()
+  @spec zone_in_schedule_format(Zone.t(), [:uuid]) :: String.t()
   defp zone_in_schedule_format(zone, schedule_zones) do
+    IO.inspect(zone, label: "zone")
+    IO.inspect(schedule_zones, label: "schedule_zones")
     if Enum.member?(schedule_zones, zone.id) do
       "bg-green-200"
     else

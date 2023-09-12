@@ -10,7 +10,11 @@ defmodule GrassFarmer.CoreDefaults do
           weatherapi_key: ""
           },
       "zones" => [%Zone{id: Ecto.UUID.generate(), name: "Front Yard", sprinkler_zone: 1}],
-      "schedules" => [%Schedule{id: Ecto.UUID.generate(), name: "Default Schedule"}],
+      "schedules" => [%Schedule{id: Ecto.UUID.generate(), 
+        name: "Default Schedule",
+        start_time: ~T[00:00:00],
+        days: [1, 2, 3, 4, 5, 6, 7],
+        zones: []}],
       "watering_logs" => [],
       "rain" =>
         %{ today: 0,
