@@ -140,11 +140,11 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
   end
 
   @impl true
-  def handle_event("submit_schedule", _params, socket) do
+  def handle_event("submit_schedule", params, socket) do
+    IO.inspect(params, label: "params")
     schedules =
       socket.assigns.schedules
       |> IO.inspect(label: "schedules submit")
-      |> Enum.map(fn schedule -> Map.merge(schedule, %{edit: false}) end)
 
     write_schedules(schedules)
 
@@ -158,12 +158,14 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
       |> Enum.map(fn schedule ->
         if schedule.id == params["id"] do
           schedule
+          |> IO.inspect(label: "schedule temp_update")
           |> convert_params(params)
+          |> IO.inspect(label: "schedule temp_update after convert")
         else
           schedule
         end
       end)
-      |> IO.inspect(label: "schedules")
+      |> IO.inspect(label: "temp update")
 
     {:noreply, assign(socket, %{schedules: schedules})}
   end
@@ -177,22 +179,17 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
       |> Enum.filter(fn schedule -> schedule.id != nil end)
 
     { :noreply,
-      assign(socket, %{schedules: saved_schedules}) }
+      assign(socket, %{schedules: saved_schedules, edit_schedule: ""}) }
   end
 
   @impl true
   def handle_event("toggle_zone", %{"schedule" => schedule_id, "zone" => zone_id}, socket) do
-    IO.inspect(zone_id, label: "zone_id")
-    IO.inspect(schedule_id, label: "schedule_id")
-
     my_schedule = Enum.find(socket.assigns.schedules, fn schedule -> schedule.id == schedule_id end)
-alias GrassFarmer.ScheduleZone
     my_zone = %ScheduleZone{zone_id: zone_id, duration: 10}
     remove = Enum.filter(my_schedule.zones, fn zone -> zone.zone_id != zone_id end)
     new_zones = remove ++ [my_zone]
     new_schedule = Map.put(my_schedule, :zones, new_zones)
     new_schedules = Enum.map(socket.assigns.schedules, fn schedule -> if schedule.id == schedule_id, do: new_schedule, else: schedule end)
-    |> IO.inspect(label: "new_schedules")
 
 
     {:noreply, assign(socket, %{schedules: new_schedules})}
@@ -263,29 +260,33 @@ alias GrassFarmer.ScheduleZone
   @spec convert_params(%Schedule{}, map()) :: %Schedule{}
   def convert_params(schedule, params) do
     IO.inspect(params, label: "params")
-    add_12 =
+    
+    hours =
       if params["start_am_pm"] == "PM" do
-        1
+        case params["start_hour"] do
+          "12" -> 0
+          hour -> String.to_integer(hour) + 12
+        end
       else
-        0
+          params["start_hour"] |> String.to_integer
       end
-
-    hours = String.to_integer(params["start_hour"]) + 12 * add_12 |> IO.inspect(label: "hours")
 
     time = Time.new!(hours, String.to_integer(params["start_minute"]), 0)
 
-    Map.merge(schedule, %{"start_time" => time})
+    Map.merge(schedule, %{start_time: time})
   end
 
   @spec zone_in_schedule_format(Zone.t(), [:uuid]) :: String.t()
   defp zone_in_schedule_format(zone, schedule_zones) do
-    IO.inspect(zone, label: "zone")
     IO.inspect(schedule_zones, label: "schedule_zones")
-    if Enum.member?(schedule_zones, zone.id) do
+    zone_ids = schedule_zones |> Enum.map(&(&1.zone_id)) |> IO.inspect(label: "zone ids") 
+    IO.inspect(zone.id, label: "zone.id")
+    if Enum.member?(zone_ids, zone.id) do
       "bg-green-200"
     else
       "bg-yellow-200"
     end
+    |> IO.inspect(label: "zone_in_schedule_format")
   end
 
 end
