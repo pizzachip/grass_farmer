@@ -141,24 +141,21 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
 
   @impl true
   def handle_event("submit_schedule", params, socket) do
-    IO.inspect(params, label: "params")
-    schedules =
-      socket.assigns.schedules
-      |> IO.inspect(label: "schedules submit")
+    schedules = socket.assigns.schedules
 
     write_schedules(schedules)
 
-    {:noreply, assign(socket, %{schedules: schedules})}
+    {:noreply, assign(socket, %{schedules: schedules, edit_schedule: ""})}
   end
 
   @impl true
   def handle_event("temp_update", params, socket) do
+    IO.inspect(params, label: "temp_update params")
     schedules =
       socket.assigns.schedules
       |> Enum.map(fn schedule ->
         if schedule.id == params["id"] do
           schedule
-          |> IO.inspect(label: "schedule temp_update")
           |> convert_params(params)
           |> IO.inspect(label: "schedule temp_update after convert")
         else
@@ -259,28 +256,24 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
 
   @spec convert_params(%Schedule{}, map()) :: %Schedule{}
   def convert_params(schedule, params) do
-    IO.inspect(params, label: "params")
-    
     hours =
-      if params["start_am_pm"] == "PM" do
-        case params["start_hour"] do
-          "12" -> 0
-          hour -> String.to_integer(hour) + 12
-        end
-      else
-          params["start_hour"] |> String.to_integer
+      case {params["start_hour"] |> String.to_integer , params["start_am_pm"]} do
+       {12, "AM"} -> 0 
+       {12, "PM"} -> 12 
+       {hour, "AM"} -> hour 
+       {hour, "PM"} -> hour + 12
       end
 
     time = Time.new!(hours, String.to_integer(params["start_minute"]), 0)
 
-    Map.merge(schedule, %{start_time: time})
+    schedule
+    |> Map.put(:name, params["name"])
+    |> Map.put(:start_time, time)
   end
 
   @spec zone_in_schedule_format(Zone.t(), [:uuid]) :: String.t()
   defp zone_in_schedule_format(zone, schedule_zones) do
-    IO.inspect(schedule_zones, label: "schedule_zones")
-    zone_ids = schedule_zones |> Enum.map(&(&1.zone_id)) |> IO.inspect(label: "zone ids") 
-    IO.inspect(zone.id, label: "zone.id")
+    zone_ids = schedule_zones |> Enum.map(&(&1.zone_id)) 
     if Enum.member?(zone_ids, zone.id) do
       "bg-green-200"
     else
