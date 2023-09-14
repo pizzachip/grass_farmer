@@ -128,10 +128,10 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
 
   @impl true
   def handle_event("create_schedule", _params, socket) do
-    schedule = %Schedule{id: Ecto.UUID.generate(), name: "New Schedule"}
+    schedule = %Schedule{id: Ecto.UUID.generate(), name: "New Schedule", zones: [], start_time: ~T[00:07:00]}
 
     { :noreply,
-       assign(socket, %{schedules: socket.assigns.schedules ++ [schedule], edit_schedule: schedule.id})}
+      assign(socket, %{schedules: ( socket.assigns.schedules ++ [schedule] ), edit_schedule: schedule.id})}
   end
 
   @impl true
@@ -140,7 +140,7 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
   end
 
   @impl true
-  def handle_event("submit_schedule", params, socket) do
+  def handle_event("submit_schedule", _params, socket) do
     schedules = socket.assigns.schedules
 
     write_schedules(schedules)
@@ -150,7 +150,6 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
 
   @impl true
   def handle_event("temp_update", params, socket) do
-    IO.inspect(params, label: "temp_update params")
     schedules =
       socket.assigns.schedules
       |> Enum.map(fn schedule ->
@@ -162,7 +161,6 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
           schedule
         end
       end)
-      |> IO.inspect(label: "temp update")
 
     {:noreply, assign(socket, %{schedules: schedules})}
   end
@@ -172,7 +170,6 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
     saved_schedules =
       PersistenceAdapter.new(%{set_name: "schedules", configs: nil})
       |> PersistenceAdapter.local_read
-      |> Enum.map(fn schedule -> Map.put(schedule, :edit, false) end)
       |> Enum.filter(fn schedule -> schedule.id != nil end)
 
     { :noreply,
@@ -181,13 +178,29 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
 
   @impl true
   def handle_event("toggle_zone", %{"schedule" => schedule_id, "zone" => zone_id}, socket) do
-    my_schedule = Enum.find(socket.assigns.schedules, fn schedule -> schedule.id == schedule_id end)
-    my_zone = %ScheduleZone{zone_id: zone_id, duration: 10}
-    remove = Enum.filter(my_schedule.zones, fn zone -> zone.zone_id != zone_id end)
-    new_zones = remove ++ [my_zone]
-    new_schedule = Map.put(my_schedule, :zones, new_zones)
-    new_schedules = Enum.map(socket.assigns.schedules, fn schedule -> if schedule.id == schedule_id, do: new_schedule, else: schedule end)
 
+    new_schedules = 
+      socket.assigns.schedules
+      |> Enum.map(fn schedule ->
+         IO.inspect(schedule, label: "schedule toggle_zone handle event before")
+        if schedule.id == schedule_id do
+          case schedule.zones do
+            [] -> 
+              Map.put(schedule, :zones, [%ScheduleZone{zone_id: zone_id, duration: 10}])
+            _ -> 
+              zone = Enum.find(schedule.zones, fn z -> z.zone_id == zone_id end)
+              case zone do
+                nil -> 
+                  Map.put(schedule, :zones, schedule.zones ++ [%ScheduleZone{zone_id: zone_id, duration: 10}])
+                _ -> 
+                  Map.put(schedule, :zones, Enum.filter(schedule.zones, fn z -> z.zone_id != zone_id end))
+              end
+          end
+        else
+          schedule
+        end
+      end)
+      |> IO.inspect(label: "new_schedules toggle_zone handle event")
 
     {:noreply, assign(socket, %{schedules: new_schedules})}
   end
@@ -232,22 +245,6 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
     end
   end
 
-  @spec toggle_zone(%Schedule{}, %ScheduleZone{}) :: %Schedule{}
-  def toggle_zone(schedule, zone) do
-    if Enum.member?(schedule.zones |> Enum.map(&{&1.zone_id}), zone.zone_id) do
-      schedule
-      |> Map.update!(:zones, fn zones ->
-          Enum.filter(zones, fn z -> z != zone.id end)
-        end)
-    else
-      schedule
-      |> Map.update!(:zones, fn zones ->
-          zones ++ [zone.id]
-          |> Enum.uniq
-        end)
-    end
-  end
-
   def write_schedules(schedules) do
     PersistenceAdapter.new(%{set_name: "schedules", configs: schedules})
     |> PersistenceAdapter.local_write
@@ -279,7 +276,6 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
     else
       "bg-yellow-200"
     end
-    |> IO.inspect(label: "zone_in_schedule_format")
   end
 
 end
