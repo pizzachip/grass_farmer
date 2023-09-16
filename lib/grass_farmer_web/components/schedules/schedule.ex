@@ -1,4 +1,4 @@
-defmodule GrassFarmerWeb.Components.Schedule do
+defmodule GrassFarmerWeb.Components.ScheduleTiles do
   use Phoenix.Component
 
   import GrassFarmerWeb.Components.StyleBlocks

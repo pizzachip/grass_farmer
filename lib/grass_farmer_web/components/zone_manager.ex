@@ -3,9 +3,6 @@ defmodule GrassFarmerWeb.Components.ZoneManager do
 
   import GrassFarmerWeb.Components.StyleBlocks
 
-  alias GrassFarmer.PersistenceAdapter
-  alias GrassFarmer.Zones.Zone
-
   @impl true
   def render(assigns) do
     ~H"""

@@ -1,5 +1,5 @@
 defmodule GrassFarmer.CoreDefaults do
-  alias GrassFarmer.Schedule
+  alias GrassFarmer.Schedules.Schedule
   alias GrassFarmer.Zones.Zone
 
   def values() do

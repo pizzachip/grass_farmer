@@ -1,12 +1,13 @@
 defmodule GrassFarmerWeb.Home do
   use GrassFarmerWeb, :live_view
 
-  alias GrassFarmerWeb.Components.{Schedule,
+  alias GrassFarmerWeb.Components.{ScheduleTiles,
     ScheduleManager,
     Weather,
     ZoneManager,
     Footer,
     StyleBlocks}
+  alias GrassFarmer.Schedules.Schedule
   alias GrassFarmer.Loader
   alias GrassFarmer.Zones.Zone
 
@@ -17,7 +18,9 @@ defmodule GrassFarmerWeb.Home do
         Loader.translate()
         |> Map.merge(
           %{time: NaiveDateTime.local_now(),
-            edit_zone: ""
+            edit_zone: "",
+            edit_schedule: "",
+            delete_schedule: ""
           })
       )
 
@@ -31,9 +34,9 @@ defmodule GrassFarmerWeb.Home do
     <.body>
       <div class="flex flex-col h-full justify-between">
         <div>
-          <Schedule.quickview />
+          <ScheduleTiles.quickview />
           <Weather.quickview />
-          <.live_component module={ScheduleManager} id="schedules" zones={@zones} schedules={@schedules} />
+          <.live_component module={ScheduleManager} id="schedules" zones={@zones} schedules={@schedules} edit_schedule={@edit_schedule}, delete_schedule={@delete_schedule} />
           <.live_component module={ZoneManager} id="zones" zones={@zones} edit_zone={@edit_zone} />
         </div>
         <div>
@@ -61,6 +64,27 @@ defmodule GrassFarmerWeb.Home do
        %{zones: Zone.update_zone(socket.assigns.zones, {zone_id, name, sprinkler_zone }),
        edit_zone: ""})
     }
+  end
+
+  @impl true
+  def handle_event("manage_schedules", %{"action" => "create"}, socket) do
+    { schedules, schedule_id } = Schedule.create_schedule(socket.assigns.schedules)
+
+    {:noreply,  assign(socket, %{schedules: schedules, edit_schedule: schedule_id}) }
+  end
+
+  @impl true
+  def handle_event("submit_schedule", _params, socket) do
+    Schedule.write_schedules(socket.assigns.schedules)
+
+    {:noreply, assign(socket, %{edit_schedule: ""}) }
+  end
+
+  @impl true
+  def handle_event("temp_update", params, socket) do
+    schedules = Schedule.temp_update(socket.assigns.schedules, params)
+
+    {:noreply, assign(socket, %{schedules: schedules, edit_schedule: params["id"]}) }
   end
 
   @impl true
