@@ -68,6 +68,17 @@ defmodule GrassFarmer.Schedules.Schedule do
       end)
   end
 
+  @spec delete([%__MODULE__{}], String.t) :: [%__MODULE__{}]
+  def delete(schedules, id) do
+    new_schedules =
+      schedules
+      |> Enum.filter(fn schedule -> schedule.id != id end)
+
+    write_schedules(new_schedules)
+
+    new_schedules
+  end
+
 end
 
 defmodule GrassFarmer.Schedules.ScheduleZone do

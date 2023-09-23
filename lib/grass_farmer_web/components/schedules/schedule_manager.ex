@@ -22,7 +22,7 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
             <%= if @edit_schedule == schedule.id  do %>
               <.schedule_modal_form myself={@myself} schedule={schedule} zones={@zones}/>
             <% end %>
-            <%= if @delete_schedule == {schedule.id} do %>
+            <%= if @delete_schedule == schedule.id do %>
               <.confirm_delete_modal myself={@myself} schedule={schedule} />
             <% end %>
           <% end %>
@@ -135,7 +135,7 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
           <div>
             <span class="font-semibold text-gray-800 pr-5"><%= @form_title %></span>
             <%= if @allow_delete == "yes" do %>
-              <span class="font-semibold text-red-400" phx-click="request_delete" phx-value-id={@entity.id} myself={@myself} >delete</span>
+              <span class="font-semibold text-red-400" phx-value-action="request_delete" phx-click="manage_schedules" phx-value-id={@entity.id} >delete</span>
             <% end %>
           </div>
           <div phx-click="cancel_edit" phx-target={@myself} >
@@ -177,48 +177,55 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
 
   @impl true
   def handle_event("toggle_zone", %{"schedule" => schedule_id, "zone" => zone_id}, socket) do
-
-    new_schedules = 
+    zones =
       socket.assigns.schedules
-      |> Enum.map(fn schedule ->
-         IO.inspect(schedule, label: "schedule toggle_zone handle event before")
+      |> Enum.filter(fn schedule -> schedule.id == schedule_id end)
+      |> List.first
+      |> Map.get(:zones)
+      |> add_inclusion_flag(zone_id) 
+      |> remove_if_included(zone_id)
+      |> add_if_excluded(zone_id)
+      |> IO.inspect(label: "toggle zone zones")
+
+    schedules = 
+      socket.assigns.schedules
+      |> Enum.map(fn schedule -> 
         if schedule.id == schedule_id do
-          case schedule.zones do
-            [] -> 
-              Map.put(schedule, :zones, [%ScheduleZone{zone_id: zone_id, duration: 10}])
-            _ -> 
-              zone = Enum.find(schedule.zones, fn z -> z.zone_id == zone_id end)
-              case zone do
-                nil -> 
-                  Map.put(schedule, :zones, schedule.zones ++ [%ScheduleZone{zone_id: zone_id, duration: 10}])
-                _ -> 
-                  Map.put(schedule, :zones, Enum.filter(schedule.zones, fn z -> z.zone_id != zone_id end))
-              end
-          end
+          Map.merge(schedule, %{zones: zones})
         else
           schedule
         end
       end)
-      |> IO.inspect(label: "new_schedules toggle_zone handle event")
-
-    {:noreply, assign(socket, %{schedules: new_schedules})}
-  end
-
-  @impl true
-  def handle_event("request_delete", params, socket) do
-    IO.inspect(params["id"], label: "request_delete params")
-    {:noreply, assign(socket, %{delete_schedule: params["id"]})}
-  end
-
-  @impl true
-  def handle_event("confirm_delete", params, socket) do
-    schedules =
-      socket.assigns.schedules
-      |> Enum.filter(fn schedule -> schedule.id != params["id"] end)
-
-    write_schedules(schedules)
-
+      |> IO.inspect(label: "toggle zone schedules")
     {:noreply, assign(socket, %{schedules: schedules})}
+  end
+
+  def add_inclusion_flag(zones, zone_id) do
+    included = 
+      Enum.filter(zones, fn zone -> zone.zone_id == zone_id end)
+      |> length
+
+    { zones, 
+      case included do
+        0 -> :excluded
+        _ -> :included 
+      end
+    }
+  end
+
+  def remove_if_included({zones, inclusion}, zone_id) do
+    case inclusion do
+      :included ->
+        { Enum.filter(zones, fn zone -> zone.id != zone_id end) }  
+      :excluded -> {zones, inclusion}
+    end
+  end
+
+  def add_if_excluded({zones, inclusion}, zone_id) do
+    case inclusion do
+      :included -> zones
+      :excluded -> zones ++ %ScheduleZone{zone_id: zone_id, duration: 10}
+    end
   end
 
   @spec duration(%Zone{}, [%ScheduleZone{}]) :: Integer
@@ -244,7 +251,9 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
 
   @spec zone_in_schedule_format(Zone.t(), [:uuid]) :: String.t()
   defp zone_in_schedule_format(zone, schedule_zones) do
-    zone_ids = schedule_zones |> Enum.map(&(&1.zone_id)) 
+    IO.inspect(zone, label: "zone_in_schedule_format zone")
+    IO.inspect(schedule_zones, label: "zone_in_schedule_format schedule_zones")
+    zone_ids = schedule_zones |> IO.inspect(label: "schedule zones in z_i_s_f") |> Enum.map(&(&1.zone_id)) 
     if Enum.member?(zone_ids, zone.id) do
       "bg-green-200"
     else

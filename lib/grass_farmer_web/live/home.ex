@@ -74,6 +74,18 @@ defmodule GrassFarmerWeb.Home do
   end
 
   @impl true
+  def handle_event("manage_schedules", %{"id" => id, "action" => "request_delete"}, socket) do
+    {:noreply, assign(socket, %{delete_schedule: id})}
+  end
+
+  @impl true
+  def handle_event("manage_schedules", %{"id" => id, "action" => "delete"}, socket) do
+    {:noreply, 
+      assign(socket, %{schedules: Schedule.delete(socket.assigns.schedules, id)})
+    }
+  end
+
+  @impl true
   def handle_event("submit_schedule", _params, socket) do
     Schedule.write_schedules(socket.assigns.schedules)
 
