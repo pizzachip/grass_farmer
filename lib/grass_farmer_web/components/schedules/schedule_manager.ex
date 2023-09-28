@@ -18,7 +18,7 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
         </div>
         <div class="flex items-start">
           <%= for schedule <- @schedules do %>
-            <div class="py-1 px-2 mr-2 rounded-md bg-green-100 hover:bg-yellow-100" phx-click="edit_schedule" phx-value-id={schedule.id} phx-target={@myself} ><%= schedule.name %></div>
+            <div class="cursor-default py-1 px-2 mr-2 rounded-md bg-green-100 hover:bg-yellow-100" phx-click="edit_schedule" phx-value-id={schedule.id} phx-target={@myself} ><%= schedule.name %></div>
             <%= if @edit_schedule == schedule.id  do %>
               <.schedule_modal_form myself={@myself} schedule={schedule} zones={@zones}/>
             <% end %>
@@ -42,7 +42,7 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
           <span class="text-xl">Are you sure you want to delete <%= @schedule.name %>?</span>
         </div>
         <div class="flex justify-between">
-          <.button class="text-xl ml-3 bg-zinc-300" phx-click="manage_schedules" phx-value-id={@schedule.id} phx-value-action="delete"> Yes </.button>
+          <span class="text-xl ml-3 text-blue-600 cursor-pointer" phx-click="manage_schedules" phx-value-id={@schedule.id} phx-value-action="delete"> Yes </span>
           <.button class="text-xl font-bold ml-3 bg-green-600 hover:bg-green-800" phx-click="cancel_edit" phx-target={@myself} > No </.button>
         </div>
       </div>
@@ -60,7 +60,7 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
       entity={@schedule}
       form_title="Update Schedule"
       allow_delete="yes" >
-      <form action="#" phx-submit="submit_schedule" phx-change="temp_update" >
+      <form action="#" phx-submit="submit_schedule" phx-change="temp_update" phx-target={@myself} >
         <.modal_form myself={@myself}>
           <div class="py-5">
             <div class="pb-5">
@@ -135,7 +135,7 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
           <div>
             <span class="font-semibold text-gray-800 pr-5"><%= @form_title %></span>
             <%= if @allow_delete == "yes" do %>
-              <span class="font-semibold text-red-400" phx-value-action="request_delete" phx-click="manage_schedules" phx-value-id={@entity.id} >delete</span>
+              <span class="font-semibold text-red-400 cursor-pointer" phx-value-action="request_delete" phx-click="manage_schedules" phx-value-id={@entity.id} >delete</span>
             <% end %>
           </div>
           <div phx-click="cancel_edit" phx-target={@myself} >
@@ -152,6 +152,7 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
 
   @impl true
   def handle_event("edit_schedule", params, socket) do
+    IO.inspect(socket.assigns.schedules, label: "schedules")
     { :noreply, assign(socket, %{edit_schedule: params["id"] }) }
   end
 
@@ -176,16 +177,23 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
   end
 
   @impl true
+  def handle_event("temp_update", params, socket) do
+    schedules = Schedule.temp_update(socket.assigns.schedules, params)
+
+    {:noreply, assign(socket, %{schedules: schedules, edit_schedule: params["id"]}) }
+  end
+
+  @impl true
   def handle_event("toggle_zone", %{"schedule" => schedule_id, "zone" => zone_id}, socket) do
     zones =
       socket.assigns.schedules
       |> Enum.filter(fn schedule -> schedule.id == schedule_id end)
       |> List.first
       |> Map.get(:zones)
-      |> add_inclusion_flag(zone_id) 
+      |> add_inclusion_flag(zone_id)
       |> remove_if_included(zone_id)
       |> add_if_excluded(zone_id)
-      |> IO.inspect(label: "toggle zone zones")
+      |> IO.inspect(label: "zones end of workflow")
 
     schedules = 
       socket.assigns.schedules
@@ -196,7 +204,7 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
           schedule
         end
       end)
-      |> IO.inspect(label: "toggle zone schedules")
+      |> IO.inspect(label: "toggle zone schedules after")
     {:noreply, assign(socket, %{schedules: schedules})}
   end
 
@@ -214,17 +222,20 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
   end
 
   def remove_if_included({zones, inclusion}, zone_id) do
+    IO.inspect(zones, label: "zones before remove")
+    IO.inspect(inclusion, label: "inclusion before remove")
+    IO.inspect(zone_id, label: "zone_id before remove")
     case inclusion do
       :included ->
-        { Enum.filter(zones, fn zone -> zone.id != zone_id end) }  
-      :excluded -> {zones, inclusion}
+        { Enum.filter(zones, fn zone -> zone.zone_id != zone_id end), :included }  
+      :excluded -> {zones, :excluded}
     end
   end
 
   def add_if_excluded({zones, inclusion}, zone_id) do
     case inclusion do
       :included -> zones
-      :excluded -> zones ++ %ScheduleZone{zone_id: zone_id, duration: 10}
+      :excluded -> zones ++ [%ScheduleZone{zone_id: zone_id, duration: 10}]
     end
   end
 
@@ -249,16 +260,12 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
     |> PersistenceAdapter.save
   end
 
-  @spec zone_in_schedule_format(Zone.t(), [:uuid]) :: String.t()
+  @spec zone_in_schedule_format(Zone.t(), [ScheduleZone.t()]) :: String.t()
   defp zone_in_schedule_format(zone, schedule_zones) do
-    IO.inspect(zone, label: "zone_in_schedule_format zone")
-    IO.inspect(schedule_zones, label: "zone_in_schedule_format schedule_zones")
-    zone_ids = schedule_zones |> IO.inspect(label: "schedule zones in z_i_s_f") |> Enum.map(&(&1.zone_id)) 
-    if Enum.member?(zone_ids, zone.id) do
-      "bg-green-200"
-    else
-      "bg-yellow-200"
-    end
+    zone_ids = 
+      schedule_zones
+      |> Enum.map(&(&1.zone_id)) 
+    if Enum.member?(zone_ids, zone.id), do: "bg-green-200", else: "bg-yellow-200"
   end
 
 end

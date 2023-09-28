@@ -1,5 +1,6 @@
 defmodule GrassFarmer.Zones.Zone do
   alias GrassFarmer.Zones.Zone
+  alias GrassFarmer.Schedules.Schedule
   alias GrassFarmer.PersistenceAdapter
 
   
@@ -15,26 +16,31 @@ defmodule GrassFarmer.Zones.Zone do
   def create_zone(zones) do
     next_sprinkler_zone =
       zones
+      |> IO.inspect(label: "zones next_sprinkler_zone")
       |> Enum.reduce(0, fn zone, acc -> max(zone.sprinkler_zone, acc) end)
-      |> IO.inspect(label: "next zone")
+      # |> String.to_integer
+      |> Kernel.+(1)
 
     new_zones = zones ++ 
-      [%Zone{id: Ecto.UUID.generate(), sprinkler_zone: (next_sprinkler_zone + 1), name: "Please name me"}]
+      [%Zone{id: Ecto.UUID.generate(), sprinkler_zone: next_sprinkler_zone, name: "Please name me"}]
 
     save(%{set_name: "zones", configs: new_zones})
 
     new_zones
   end
 
-  @spec delete_zone([Zone], String.t()) :: [Zone]
-  def delete_zone(zones, zone_id) do
+  @spec delete_zone([Zone.t()], [Schedule.t()], String.t()) :: [Zone]
+  def delete_zone(zones, schedules, zone_id) do
     new_zones =
       zones
       |> Enum.filter(fn zone -> zone.id != zone_id end)
 
-    save(%{set_name: "zones", configs: new_zones})
+    new_schedules = Schedule.update_schedule_zones(schedules, new_zones)
 
-    new_zones
+    save(%{set_name: "zones", configs: new_zones})
+    save(%{set_name: "schedules", configs: new_schedules})
+
+    {new_zones, new_schedules}
   end
 
   @spec update_zone([Zone], String.t()) :: [Zone]
@@ -49,8 +55,8 @@ defmodule GrassFarmer.Zones.Zone do
     new_zones
   end
 
-  defp save(zone_updates) do
-    PersistenceAdapter.new(zone_updates)
+  defp save(updates) do
+    PersistenceAdapter.new(updates)
     |> PersistenceAdapter.local_write
     |> PersistenceAdapter.save
   end

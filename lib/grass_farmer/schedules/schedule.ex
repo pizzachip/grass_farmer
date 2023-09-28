@@ -14,7 +14,7 @@ defmodule GrassFarmer.Schedules.Schedule do
 
   @spec create_schedule([__MODULE__.t()]) :: [__MODULE__.t()]
   def create_schedule(schedules) do
-    schedule = %__MODULE__{id: Ecto.UUID.generate(), name: "New Schedule", zones: [], start_time: ~T[00:07:00]}
+    schedule = %__MODULE__{id: Ecto.UUID.generate(), name: "New Schedule", zones: [], days: [1..7], start_time: ~T[00:07:00]}
     schedules = schedules ++ [schedule]
     write_schedules(schedules)
 
@@ -40,6 +40,8 @@ defmodule GrassFarmer.Schedules.Schedule do
 
   @spec convert_params(%__MODULE__{}, map()) :: %__MODULE__{}
   def convert_params(schedule, params) do
+    IO.inspect(schedule, label: "schedule convert_params")
+    IO.inspect(params, label: "params convert_params")
     hours =
       case {params["start_hour"] |> String.to_integer , params["start_am_pm"]} do
        {12, "AM"} -> 0 
@@ -53,6 +55,7 @@ defmodule GrassFarmer.Schedules.Schedule do
     schedule
     |> Map.put(:name, params["name"])
     |> Map.put(:start_time, time)
+    |> IO.inspect(label: "return schedule convert_params")
   end
 
   @spec temp_update([%__MODULE__{}], map()) :: %__MODULE__{}
@@ -62,21 +65,31 @@ defmodule GrassFarmer.Schedules.Schedule do
         if schedule.id == params["id"] do
           schedule
           |> __MODULE__.convert_params(params)
+          |> IO.inspect(label: "schedule temp_update in workflow")
+          |> Map.merge(%{zones: schedule.zones})
         else
           schedule
         end
       end)
   end
 
-  @spec delete([%__MODULE__{}], String.t) :: [%__MODULE__{}]
-  def delete(schedules, id) do
-    new_schedules =
-      schedules
-      |> Enum.filter(fn schedule -> schedule.id != id end)
+  @spec update_schedule_zones([Schedule.t()], [Zone.t()]) :: [Schedule.t()]
+  def update_schedule_zones(schedules, zones) do
+    zone_ids = Enum.map(zones, fn zone -> zone.id end)
 
-    write_schedules(new_schedules)
-
-    new_schedules
+    schedules
+    |> Enum.map(fn schedule -> #I need to return a schedule with an updated zones list
+      Map.put(schedule, :zones,
+        schedule.zones
+        |> Enum.reduce([], fn zone, acc -> 
+           if Enum.member?(zone_ids, zone.zone_id) do
+             acc ++ [zone]
+           else
+            acc
+          end
+        end)
+        )
+    end)
   end
 
 end
