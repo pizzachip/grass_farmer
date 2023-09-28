@@ -32,7 +32,7 @@ defmodule GrassFarmerWeb.Components.StyleBlocks do
     <div >
       <%= render_slot(@inner_block) %>
       <div class="flex flex-row items-center justify-between py-5 border-t border-gray-200" >
-        <p class="font-semibold text-blue-600 cursor-pointer" phx-click="cancel_edit" phx-target={@myself} >Cancel</p>
+        <p class="font-semibold text-blue-600 cursor-pointer" phx-click="manage_schedules" phx-value-action="cancel_edit" >Cancel</p>
         <input class="px-4 py-2 text-white font-semibold bg-blue-500 rounded" phx-target={@myself} type="submit" value="Save" />
       </div>
     </div>

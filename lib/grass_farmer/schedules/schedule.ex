@@ -123,6 +123,12 @@ defmodule GrassFarmer.Schedules.Schedule do
       end)
   end
 
+  def get_schedules() do
+    PersistenceAdapter.new(%{set_name: "schedules", configs: nil})
+    |> PersistenceAdapter.local_read
+    |> Enum.filter(fn schedule -> schedule.id != nil end)
+  end
+
   @spec update_schedule_zones([Schedule.t()], [Zone.t()]) :: [Schedule.t()]
   def update_schedule_zones(schedules, zones) do
     zone_ids = Enum.map(zones, fn zone -> zone.id end)
@@ -144,12 +150,3 @@ defmodule GrassFarmer.Schedules.Schedule do
 
 end
 
-defmodule GrassFarmer.Schedules.ScheduleZone do
-
-  @type t :: %__MODULE__{
-    zone_id: Ecto.UUID.t(),
-    duration: integer()
-  }
-
-  defstruct [:zone_id, :duration]
-end

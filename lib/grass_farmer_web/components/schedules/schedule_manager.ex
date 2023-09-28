@@ -18,7 +18,7 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
         </div>
         <div class="flex items-start">
           <%= for schedule <- @schedules do %>
-            <div class="cursor-default py-1 px-2 mr-2 rounded-md bg-green-100 hover:bg-yellow-100" phx-click="edit_schedule" phx-value-id={schedule.id} phx-target={@myself} ><%= schedule.name %></div>
+            <div class="cursor-default py-1 px-2 mr-2 rounded-md bg-green-100 hover:bg-yellow-100" phx-click="manage_schedules" phx-value-action="edit_schedule" phx-value-id={schedule.id} ><%= schedule.name %></div>
             <%= if @edit_schedule == schedule.id  do %>
               <.schedule_modal_form myself={@myself} schedule={schedule} zones={@zones}/>
             <% end %>
@@ -43,7 +43,7 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
         </div>
         <div class="flex justify-between">
           <span class="text-xl ml-3 text-blue-600 cursor-pointer" phx-click="manage_schedules" phx-value-id={@schedule.id} phx-value-action="delete"> Yes </span>
-          <.button class="text-xl font-bold ml-3 bg-green-600 hover:bg-green-800" phx-click="cancel_edit" phx-target={@myself} > No </.button>
+          <.button class="text-xl font-bold ml-3 bg-green-600 hover:bg-green-800" phx-click="manage_schedules" phx-value-action="cancel_edit" > No </.button>
         </div>
       </div>
     </.modal_wrapper>
@@ -129,7 +129,7 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
   attr :allow_delete, :string, required: true
   def modal_wrapper(assigns) do
     ~H"""
-    <div class="flex justify-center h-screen w-screen top-0 left-0 fixed items-center bg-green-200/75 antialiased" phx-click="cancel_edit" phx-target={@myself}>
+    <div class="flex justify-center h-screen w-screen top-0 left-0 fixed items-center bg-green-200/75 antialiased" phx-click="manage_schedules" phx-value-action="cancel_edit">
       <div class="flex flex-col w-11/12 sm:w-5/6 lg:w-1/2 max-w-2xl mx-auto rounded-lg border border-gray-300 shadow-xl" phx-click="" phx-target={@myself}>
         <div class="flex flex-row justify-between p-6 bg-white border-b border-gray-200 rounded-tl-lg rounded-tr-lg">
           <div>
@@ -138,7 +138,7 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
               <span class="font-semibold text-red-400 cursor-pointer" phx-value-action="request_delete" phx-click="manage_schedules" phx-value-id={@entity.id} >delete</span>
             <% end %>
           </div>
-          <div phx-click="cancel_edit" phx-target={@myself} >
+          <div phx-click="manage_schedules" phx-value-action="cancel_edit" >
             <.close_x />
           </div>
         </div>
@@ -148,38 +148,6 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
       </div>
     </div>
     """
-  end
-
-  @impl true
-  def handle_event("edit_schedule", params, socket) do
-    { :noreply, assign(socket, %{edit_schedule: params["id"] }) }
-  end
-
-  @impl true
-  def handle_event("submit_schedule", _params, socket) do
-    schedules = socket.assigns.schedules
-
-    write_schedules(schedules)
-
-    {:noreply, assign(socket, %{schedules: schedules, edit_schedule: ""})}
-  end
-
-  @impl true
-  def handle_event("cancel_edit", _params, socket) do
-    saved_schedules =
-      PersistenceAdapter.new(%{set_name: "schedules", configs: nil})
-      |> PersistenceAdapter.local_read
-      |> Enum.filter(fn schedule -> schedule.id != nil end)
-
-    { :noreply,
-      assign(socket, %{schedules: saved_schedules, edit_schedule: ""}) }
-  end
-
-  @impl true
-  def handle_event("temp_update", params, socket) do
-    schedules = Schedule.temp_update(socket.assigns.schedules, params)
-
-    {:noreply, assign(socket, %{schedules: schedules, edit_schedule: params["id"]}) }
   end
 
   @spec duration(Zone.t(), [ScheduleZone.t()]) :: integer() 
@@ -197,11 +165,11 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
     end
   end
 
-  def write_schedules(schedules) do
-    PersistenceAdapter.new(%{set_name: "schedules", configs: schedules})
-    |> PersistenceAdapter.local_write
-    |> PersistenceAdapter.save
-  end
+  # def write_schedules(schedules) do
+  #  PersistenceAdapter.new(%{set_name: "schedules", configs: schedules})
+  #  |> PersistenceAdapter.local_write
+  #  |> PersistenceAdapter.save
+  #end
 
   @spec zone_in_schedule_format(Zone.t(), [ScheduleZone.t()]) :: String.t()
   defp zone_in_schedule_format(zone, schedule_zones) do

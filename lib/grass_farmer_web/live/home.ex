@@ -76,22 +76,34 @@ defmodule GrassFarmerWeb.Home do
   end
 
   @impl true
-  def handle_event("manage_schedules", %{"id" => id, "action" => "request_delete"}, socket) do
+  def handle_event("manage_schedules", %{ "action" => "edit_schedule", "id" => id }, socket) do
+    { :noreply, assign(socket, %{edit_schedule: id }) }
+  end
+
+
+  @impl true
+  def handle_event("manage_schedules", %{"action" => "request_delete", "id" => id}, socket) do
     {:noreply, assign(socket, %{delete_schedule: id})}
   end
 
   @impl true
-  def handle_event("manage_schedules", %{"id" => id, "action" => "delete"}, socket) do
+  def handle_event("manage_schedules", %{ "action" => "delete", "id" => id}, socket) do
     {:noreply, 
       assign(socket, %{schedules: Schedule.delete(socket.assigns.schedules, id)})
     }
   end
 
   @impl true
-  def handle_event("manage_schedules", %{"zone" => zone_id, "schedule" => schedule_id, "action" => "toggle_zone"}, socket) do
+  def handle_event("manage_schedules", %{"action" => "toggle_zone", "zone" => zone_id, "schedule" => schedule_id}, socket) do
     {:noreply, 
       assign(socket, %{schedules: Schedule.toggle_zone(schedule_id, zone_id, socket.assigns.schedules)})
     }
+  end
+
+  @impl true
+  def handle_event("manage_schedules", %{"action" => "cancel_edit"}, socket) do
+    { :noreply,
+      assign(socket, %{schedules: Schedule.get_schedules(), edit_schedule: ""}) }
   end
 
   @impl true
