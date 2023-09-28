@@ -14,7 +14,7 @@ defmodule GrassFarmer.Schedules.Schedule do
 
   @spec create_schedule([__MODULE__.t()]) :: [__MODULE__.t()]
   def create_schedule(schedules) do
-    schedule = %__MODULE__{id: Ecto.UUID.generate(), name: "New Schedule", zones: [], days: [1..7], start_time: ~T[00:07:00]}
+    schedule = %__MODULE__{id: Ecto.UUID.generate(), name: "New Schedule", zones: [], days: 1..7, start_time: ~T[00:07:00]}
     schedules = schedules ++ [schedule]
     write_schedules(schedules)
 
@@ -30,6 +30,56 @@ defmodule GrassFarmer.Schedules.Schedule do
     write_schedules(new_schedules)
 
     new_schedules
+  end
+
+  @spec toggle_zone(UUID.t(), UUID.t(), [__MODULE__.t()]) :: [__MODULE__.t()]
+  def toggle_zone(schedule_id, zone_id, schedules) do
+    zones =
+      schedules
+      |> Enum.filter(fn schedule -> schedule.id == schedule_id end)
+      |> List.first
+      |> Map.get(:zones)
+      |> add_inclusion_flag(zone_id)
+      |> remove_if_included(zone_id)
+      |> add_if_excluded(zone_id)
+
+    Enum.map(schedules, fn schedule -> 
+      if schedule.id == schedule_id do
+        Map.merge(schedule, %{zones: zones})
+      else
+        schedule
+      end
+    end)
+  end
+
+  def add_inclusion_flag(zones, zone_id) do
+    included = 
+      Enum.filter(zones, fn zone -> zone.zone_id == zone_id end)
+      |> length
+
+    { zones, 
+      case included do
+        0 -> :excluded
+        _ -> :included 
+      end
+    }
+  end
+
+  def remove_if_included({zones, inclusion}, zone_id) do
+    case inclusion do
+      :included ->
+        { Enum.filter(zones, fn zone -> zone.zone_id != zone_id end), :included }  
+      :excluded -> {zones, :excluded}
+    end
+  end
+
+  @spec add_if_excluded({[ScheduleZone.t()], atom()}, UUID.t()) :: [Zones.t()]
+  def add_if_excluded({zones, inclusion}, zone_id) do
+    zone_to_add = %GrassFarmer.Schedules.ScheduleZone{zone_id: zone_id, duration: 10}
+    case inclusion do
+      :included -> zones
+      :excluded -> zones ++ [zone_to_add]
+    end
   end
 
   def write_schedules(schedules) do

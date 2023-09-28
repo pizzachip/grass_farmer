@@ -18,7 +18,6 @@ defmodule GrassFarmer.Zones.Zone do
       zones
       |> IO.inspect(label: "zones next_sprinkler_zone")
       |> Enum.reduce(0, fn zone, acc -> max(zone.sprinkler_zone, acc) end)
-      # |> String.to_integer
       |> Kernel.+(1)
 
     new_zones = zones ++ 
@@ -48,7 +47,7 @@ defmodule GrassFarmer.Zones.Zone do
     new_zones =
       zones
       |> Enum.map(fn zone -> 
-        if zone.id == zone_id, do: %Zone{zone | name: zone_name, sprinkler_zone: sprinkler_zone},  else: zone end)
+        if zone.id == zone_id, do: %Zone{zone | name: zone_name, sprinkler_zone: sprinkler_zone |> String.to_integer},  else: zone end)
 
     save(%{set_name: "zones", configs: new_zones})
 

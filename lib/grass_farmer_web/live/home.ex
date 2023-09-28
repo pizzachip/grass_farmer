@@ -88,11 +88,25 @@ defmodule GrassFarmerWeb.Home do
   end
 
   @impl true
+  def handle_event("manage_schedules", %{"zone" => zone_id, "schedule" => schedule_id, "action" => "toggle_zone"}, socket) do
+    {:noreply, 
+      assign(socket, %{schedules: Schedule.toggle_zone(schedule_id, zone_id, socket.assigns.schedules)})
+    }
+  end
+
+  @impl true
   def handle_event("submit_schedule", _params, socket) do
     IO.inspect(socket.assigns.schedules, label: "submit_schedule")
     Schedule.write_schedules(socket.assigns.schedules)
 
     {:noreply, assign(socket, %{edit_schedule: ""}) }
+  end
+
+  @impl true
+  def handle_event("temp_update", params, socket) do
+    schedules = Schedule.temp_update(socket.assigns.schedules, params)
+
+    {:noreply, assign(socket, %{schedules: schedules, edit_schedule: params["id"]}) }
   end
 
   @impl true

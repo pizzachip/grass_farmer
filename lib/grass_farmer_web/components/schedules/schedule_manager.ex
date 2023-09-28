@@ -60,7 +60,7 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
       entity={@schedule}
       form_title="Update Schedule"
       allow_delete="yes" >
-      <form action="#" phx-submit="submit_schedule" phx-change="temp_update" phx-target={@myself} >
+      <form action="#" phx-submit="submit_schedule" phx-change="temp_update" >
         <.modal_form myself={@myself}>
           <div class="py-5">
             <div class="pb-5">
@@ -109,7 +109,7 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
               <div>Valve Number</div>
             </li>
             <%= for zone <- @zones do %>
-              <li class={zone_in_schedule_format(zone, @schedule.zones) <> " flex justify-between p-3"} phx-click="toggle_zone" phx-value-zone={zone.id} phx-value-schedule={@schedule.id} phx-target={@myself} >
+              <li class={zone_in_schedule_format(zone, @schedule.zones) <> " flex justify-between p-3"} phx-click="manage_schedules" phx-value-action="toggle_zone" phx-value-zone={zone.id} phx-value-schedule={@schedule.id} >
                 <div><%= zone.name %></div>
                 <div><%= duration(zone, @schedule.zones) %></div>
                 <div><%= zone.sprinkler_zone %></div>
@@ -152,7 +152,6 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
 
   @impl true
   def handle_event("edit_schedule", params, socket) do
-    IO.inspect(socket.assigns.schedules, label: "schedules")
     { :noreply, assign(socket, %{edit_schedule: params["id"] }) }
   end
 
@@ -183,63 +182,7 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
     {:noreply, assign(socket, %{schedules: schedules, edit_schedule: params["id"]}) }
   end
 
-  @impl true
-  def handle_event("toggle_zone", %{"schedule" => schedule_id, "zone" => zone_id}, socket) do
-    zones =
-      socket.assigns.schedules
-      |> Enum.filter(fn schedule -> schedule.id == schedule_id end)
-      |> List.first
-      |> Map.get(:zones)
-      |> add_inclusion_flag(zone_id)
-      |> remove_if_included(zone_id)
-      |> add_if_excluded(zone_id)
-      |> IO.inspect(label: "zones end of workflow")
-
-    schedules = 
-      socket.assigns.schedules
-      |> Enum.map(fn schedule -> 
-        if schedule.id == schedule_id do
-          Map.merge(schedule, %{zones: zones})
-        else
-          schedule
-        end
-      end)
-      |> IO.inspect(label: "toggle zone schedules after")
-    {:noreply, assign(socket, %{schedules: schedules})}
-  end
-
-  def add_inclusion_flag(zones, zone_id) do
-    included = 
-      Enum.filter(zones, fn zone -> zone.zone_id == zone_id end)
-      |> length
-
-    { zones, 
-      case included do
-        0 -> :excluded
-        _ -> :included 
-      end
-    }
-  end
-
-  def remove_if_included({zones, inclusion}, zone_id) do
-    IO.inspect(zones, label: "zones before remove")
-    IO.inspect(inclusion, label: "inclusion before remove")
-    IO.inspect(zone_id, label: "zone_id before remove")
-    case inclusion do
-      :included ->
-        { Enum.filter(zones, fn zone -> zone.zone_id != zone_id end), :included }  
-      :excluded -> {zones, :excluded}
-    end
-  end
-
-  def add_if_excluded({zones, inclusion}, zone_id) do
-    case inclusion do
-      :included -> zones
-      :excluded -> zones ++ [%ScheduleZone{zone_id: zone_id, duration: 10}]
-    end
-  end
-
-  @spec duration(%Zone{}, [%ScheduleZone{}]) :: Integer
+  @spec duration(Zone.t(), [ScheduleZone.t()]) :: integer() 
   defp duration(zone, schedule_zones) do
     case schedule_zones do
       [] -> 0
