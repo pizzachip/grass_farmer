@@ -68,7 +68,7 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
               <label class="pr-5">Name</label><input type="text" name="name" value={@schedule.name} />
             </div>
             
-            <div class="pb-5">
+            <div class="pb-5 justify-between flex">
               <%= for day <- 1..7 do %>
                 <div class="inline-block">
                   <button type="button" 
@@ -126,7 +126,7 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
               <div>Valve Number</div>
             </li>
             <%= for zone <- @zones do %>
-              <li class={zone_in_schedule_format(zone, @schedule.zones) <> " flex justify-between p-3"} 
+              <li class={zone_in_schedule_format(zone, @schedule.zones) <> " flex justify-between p-3 my-2"} 
                   phx-click="manage_schedules" 
                   phx-value-action="toggle_zone" 
                   phx-value-zone={zone.id} 
@@ -188,11 +188,7 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
 
   @spec day_select([integer()], integer()) :: String.t()
   defp day_select(days, day) do
-    if Enum.member?(days, day) do
-      "bg-green-400 text-white"
-    else
-      "bg-gray-200 text-gray-600"
-    end
+    if Enum.member?(days, day), do: "bg-green-400 text-white", else: "bg-gray-200 text-gray-600"
   end
 
   @spec zone_in_schedule_format(Zone.t(), [ScheduleZone.t()]) :: String.t()
