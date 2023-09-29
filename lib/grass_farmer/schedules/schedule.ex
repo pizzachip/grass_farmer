@@ -82,6 +82,21 @@ defmodule GrassFarmer.Schedules.Schedule do
     end
   end
 
+  @spec toggle_day([Schedule.t()], UUID.t(), integer()) :: [Shedule.t()]
+  def toggle_day(schedules, schedule_id, day) do
+    Enum.map(schedules, fn schedule -> 
+      if schedule.id == schedule_id do
+        if schedule.days |> Enum.member?(day) do
+          Map.merge(schedule, %{days: Enum.filter(schedule.days, fn d -> d != day end)})
+        else
+          Map.merge(schedule, %{days: schedule.days ++ [day]})
+        end
+      else
+        schedule
+      end
+    end)
+  end
+
   def write_schedules(schedules) do
     PersistenceAdapter.new(%{set_name: "schedules", configs: schedules})
     |> PersistenceAdapter.local_write

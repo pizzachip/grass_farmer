@@ -107,6 +107,14 @@ defmodule GrassFarmerWeb.Home do
   end
 
   @impl true
+  def handle_event("manage_schedules", %{"action" => "toggle_day", "schedule" => schedule_id, "day" => day}, socket) do
+    IO.inspect(socket.assigns.schedules, label: "schedules before toggle day")
+    {:noreply, 
+      assign(socket, %{schedules: Schedule.toggle_day(socket.assigns.schedules, schedule_id, day |> String.to_integer)})
+    }
+  end
+
+  @impl true
   def handle_event("submit_schedule", _params, socket) do
     IO.inspect(socket.assigns.schedules, label: "submit_schedule")
     Schedule.write_schedules(socket.assigns.schedules)

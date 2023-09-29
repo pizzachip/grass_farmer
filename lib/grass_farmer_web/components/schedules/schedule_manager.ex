@@ -67,6 +67,23 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
               <input type="hidden" name="id" value={@schedule.id} />
               <label class="pr-5">Name</label><input type="text" name="name" value={@schedule.name} />
             </div>
+            
+            <div class="pb-5">
+              <%= for day <- 1..7 do %>
+                <div class="inline-block">
+                  <button type="button" 
+                    class={day_select(@schedule.days, day) <> " py-0.5 px-2"} 
+                    phx-click="manage_schedules" 
+                    phx-value-action="toggle_day" 
+                    phx-value-day={day} 
+                    phx-value-schedule={@schedule.id}
+                  >
+                    <%= day_string(day) %>
+                  </button>
+                </div>
+              <% end %>
+            </div>
+
             <label class="pr-5">Start Time</label>
 
             <select name="start_hour" >
@@ -109,7 +126,11 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
               <div>Valve Number</div>
             </li>
             <%= for zone <- @zones do %>
-              <li class={zone_in_schedule_format(zone, @schedule.zones) <> " flex justify-between p-3"} phx-click="manage_schedules" phx-value-action="toggle_zone" phx-value-zone={zone.id} phx-value-schedule={@schedule.id} >
+              <li class={zone_in_schedule_format(zone, @schedule.zones) <> " flex justify-between p-3"} 
+                  phx-click="manage_schedules" 
+                  phx-value-action="toggle_zone" 
+                  phx-value-zone={zone.id} 
+                  phx-value-schedule={@schedule.id} >
                 <div><%= zone.name %></div>
                 <div><%= duration(zone, @schedule.zones) %></div>
                 <div><%= zone.sprinkler_zone %></div>
@@ -130,7 +151,7 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
   def modal_wrapper(assigns) do
     ~H"""
     <div class="flex justify-center h-screen w-screen top-0 left-0 fixed items-center bg-green-200/75 antialiased" phx-click="manage_schedules" phx-value-action="cancel_edit">
-      <div class="flex flex-col w-11/12 sm:w-5/6 lg:w-1/2 max-w-2xl mx-auto rounded-lg border border-gray-300 shadow-xl" phx-click="" phx-target={@myself}>
+      <div class="flex flex-col w-11/12 sm:w-5/6 lg:w-1/2 max-w-2xl mx-auto rounded-lg border border-gray-300 shadow-xl" phx-click="" >
         <div class="flex flex-row justify-between p-6 bg-white border-b border-gray-200 rounded-tl-lg rounded-tr-lg">
           <div>
             <span class="font-semibold text-gray-800 pr-5"><%= @form_title %></span>
@@ -165,11 +186,14 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
     end
   end
 
-  # def write_schedules(schedules) do
-  #  PersistenceAdapter.new(%{set_name: "schedules", configs: schedules})
-  #  |> PersistenceAdapter.local_write
-  #  |> PersistenceAdapter.save
-  #end
+  @spec day_select([integer()], integer()) :: String.t()
+  defp day_select(days, day) do
+    if Enum.member?(days, day) do
+      "bg-green-400 text-white"
+    else
+      "bg-gray-200 text-gray-600"
+    end
+  end
 
   @spec zone_in_schedule_format(Zone.t(), [ScheduleZone.t()]) :: String.t()
   defp zone_in_schedule_format(zone, schedule_zones) do

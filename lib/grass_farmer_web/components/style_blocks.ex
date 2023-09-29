@@ -235,4 +235,17 @@ defmodule GrassFarmerWeb.Components.StyleBlocks do
       12 -> "Dec"
     end
   end
+
+  @spec day_string(integer()) :: String.t()
+  def day_string(day) do
+    case day do
+      1 -> "Sun"
+      2 -> "Mon"
+      3 -> "Tue"
+      4 -> "Wed"
+      5 -> "Thu"
+      6 -> "Fri"
+      7 -> "Sat"
+    end
+  end
 end
