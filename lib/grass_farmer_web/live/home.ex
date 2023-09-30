@@ -108,10 +108,32 @@ defmodule GrassFarmerWeb.Home do
 
   @impl true
   def handle_event("manage_schedules", %{"action" => "toggle_day", "schedule" => schedule_id, "day" => day}, socket) do
-    IO.inspect(socket.assigns.schedules, label: "schedules before toggle day")
     {:noreply, 
       assign(socket, %{schedules: Schedule.toggle_day(socket.assigns.schedules, schedule_id, day |> String.to_integer)})
     }
+  end
+
+  @impl true
+  def handle_event("update_zone_duration", %{"schedule" => schedule_id, 
+    "zone" => zone_id,
+    "duration" => duration}, socket) do
+
+    new_schedules =
+      socket.assigns.schedules
+      |> Enum.map( fn schedule ->
+        if schedule.id == schedule_id do
+           %{schedule | zones: Enum.map(schedule.zones, fn zone ->
+             if zone.zone_id == zone_id do
+               %{zone | duration: duration |> String.to_integer}
+             else
+               zone
+             end
+           end)}
+        else
+          schedule
+        end
+      end) 
+    {:noreply, assign(socket, %{schedules: new_schedules})}
   end
 
   @impl true

@@ -75,7 +75,7 @@ defmodule GrassFarmer.Schedules.Schedule do
 
   @spec add_if_excluded({[ScheduleZone.t()], atom()}, UUID.t()) :: [Zones.t()]
   def add_if_excluded({zones, inclusion}, zone_id) do
-    zone_to_add = %GrassFarmer.Schedules.ScheduleZone{zone_id: zone_id, duration: 10}
+    zone_to_add = %GrassFarmer.Schedules.ScheduleZone{zone_id: zone_id}
     case inclusion do
       :included -> zones
       :excluded -> zones ++ [zone_to_add]
@@ -125,6 +125,7 @@ defmodule GrassFarmer.Schedules.Schedule do
 
   @spec temp_update([%__MODULE__{}], map()) :: %__MODULE__{}
   def temp_update(schedules, params) do
+    IO.inspect(params, label: "params temp_update")
     schedules
       |> Enum.map(fn schedule ->
         if schedule.id == params["id"] do

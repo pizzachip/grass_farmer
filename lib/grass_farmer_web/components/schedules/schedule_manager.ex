@@ -132,7 +132,14 @@ defmodule GrassFarmerWeb.Components.ScheduleManager do
                   phx-value-zone={zone.id} 
                   phx-value-schedule={@schedule.id} >
                 <div><%= zone.name %></div>
-                <div><%= duration(zone, @schedule.zones) %></div>
+                <div>
+                  <input 
+                    name={"duration|" <> zone.id}
+                    type="integer" 
+                    value={duration(zone, @schedule.zones)} 
+                    phx-click=""
+                  />
+                </div>
                 <div><%= zone.sprinkler_zone %></div>
               </li>
             <% end %>
