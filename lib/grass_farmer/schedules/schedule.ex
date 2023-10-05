@@ -107,20 +107,25 @@ defmodule GrassFarmer.Schedules.Schedule do
   def convert_params(schedule, params) do
     IO.inspect(schedule, label: "schedule convert_params")
     IO.inspect(params, label: "params convert_params")
-    hours =
-      case {params["start_hour"] |> String.to_integer , params["start_am_pm"]} do
-       {12, "AM"} -> 0 
-       {12, "PM"} -> 12 
-       {hour, "AM"} -> hour 
-       {hour, "PM"} -> hour + 12
-      end
-
-    time = Time.new!(hours, String.to_integer(params["start_minute"]), 0)
+    time = convert_time(params
 
     schedule
     |> Map.put(:name, params["name"])
     |> Map.put(:start_time, time)
     |> IO.inspect(label: "return schedule convert_params")
+  end
+
+  @spec convert_time(map()) :: Time.t()
+  defp convert_time(params) do
+    hours =
+      case {params["start_hour"] |> String.to_integer , params["start_am_pm"]} do
+        {12, "AM"} -> 0 
+        {12, "PM"} -> 12 
+        {hour, "AM"} -> hour 
+        {hour, "PM"} -> hour + 12
+      end
+
+    Time.new!(hours, String.to_integer(params["start_minute"]), 0)
   end
 
   @spec temp_update([%__MODULE__{}], map()) :: %__MODULE__{}
